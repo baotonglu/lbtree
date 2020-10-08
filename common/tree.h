@@ -100,7 +100,7 @@ static inline unsigned long long rdtsc(void)
 #define ceiling(x, y)  (((x) + (y) - 1) / (y))
 #define floor(x, y)    ((x) / (y))
 
-#define swap(x, y) \
+#define SWAP(x, y) \
 do { auto _t=(x); (x)=(y); (y)=_t; } while(0)
 
 /* ---------------------------------------------------------------------- */

@@ -52,7 +52,7 @@ public:
             if (pm_pool_ == nullptr) {
                 LOG_FATAL("failed to create a pool;");
             }
-            std::cout << "pool opened at: " << std::hex << pm_pool_ << std::dec << std::endl;
+            //std::cout << "pool opened at: " << std::hex << pm_pool_ << std::dec << std::endl;
         }else{
             LOG("opening an existing pool, and trying to map to same address");
             /* Need to open an existing persistent pool */
