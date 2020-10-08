@@ -21,6 +21,13 @@
 /* ---------------------------------------------------------------------- */
 
 #include "tree.h"
+
+#define PMDK_ALLOC 1
+
+#ifdef PMDK_ALLOC
+#include "allocator.h"
+#endif
+
 /* ---------------------------------------------------------------------- */
 
 /* In a non-leaf, there are NON_LEAF_KEY_NUM keys and NON_LEAF_KEY_NUM+1
@@ -281,6 +288,14 @@ public:
     int level () {return tree_meta->root_level;}
     
 }; // lbtree
+
+
+// Aligned DRAM alloc
+void* alignedmalloc(size_t size) {
+  void* ret;
+  posix_memalign(&ret, 64, size);
+  return ret;
+}
 
 /* ---------------------------------------------------------------------- */
 #endif /* _LBTREE_H */

@@ -137,6 +137,7 @@ class mempool {
    {
        long long  used= (mempool_cur - mempool_start);
        long long  ff= 0;
+       // BT: the first pointer in node pointing to the next node in memory pool?
        for(char *p = mempool_free_node; p; p= *((char **)p))
            ff ++;
 
@@ -158,6 +159,8 @@ class mempool {
    * Note: the memory pool will be allocated from the end.
    * Make sure the size is aligned.  The code will not check this.
    */
+
+  //BT: unsafe? no cacheline flush during allocation?
    void * alloc (unsigned long long size)
    {
        if (mempool_cur + size <= mempool_end) {

@@ -77,7 +77,7 @@ static void initUseful(void)
 int lbtree::bulkloadSubtree(
     keyInput *input, int start_key, int num_key, 
     float bfill, int target_level,
-    Pointer8B pfirst[], int n_nodes[])
+    Pointer8B pfirst[], Pointer8B plast[], int n_nodes[])
 {
     // We assume that a tree cannot be higher than 32 levels
     int ncur[32];     // current node at every level
@@ -104,14 +104,33 @@ int lbtree::bulkloadSubtree(
        top_level= i;
     } // end of for each nonleaf level
 
-
     // 3. allocate nodes
+#ifndef PMDK_ALLOC
     pfirst[0]= nvmpool_alloc(sizeof(bleaf) * n_nodes[0]);
-    for (int i=1; i<=top_level; i++) {
-       pfirst[i]= mempool_alloc(sizeof(bnode) * n_nodes[i]);
+#else
+    Pointer8B** nodes_array = new (Pointer8B*)[top_level + 1]; 
+    int leaf_num = n_nodes[0];
+    nodes_array[0] = new Pointer8B[leaf_num];
+    for(int i = 0; i < leaf_num; ++i){
+      my_alloc::BasePMPool::ZAllocate((void**)&nodes_array[0][i], sizeof(bleaf));
     }
-       // nvmpool_alloc/mempool_alloc call exit if out of memory
+    pfirst[0] = nodes_array[0][0];
+    plast[0] = nodes_array[0][leaf_num - 1];
+#endif
 
+    for (int i=1; i<=top_level; i++) {
+    //BT: FIXME, confusing => why using preallocation like this way?
+#ifndef PMDK_ALLOC
+       pfirst[i]= mempool_alloc(sizeof(bnode) * n_nodes[i]);
+#else
+       nodes_array[i] = new Pointer8B[n_nodes[i]];
+       for(int j = 0; j < n_nodes[i]; ++j){
+          nodes_array[i][j] = alignedmalloc(sizeof(bnode));
+       }
+       pfirst[i] = nodes_array[i][0];
+#endif
+    }
+    // nvmpool_alloc/mempool_alloc call exit if out of memory
 
     // 4. populate nodes
     for (int ll=1; ll<=top_level; ll++) {
@@ -130,9 +149,13 @@ int lbtree::bulkloadSubtree(
     leaf_meta.v.alt= 0;
 
     int key_id= start_key;
+    // For-loop for all leaf nodes
     for (int i=0; i<nodenum; i++) {
-        bleaf *lp= &(leaf[i]);
-
+#ifdef PMDK_ALLOC
+        bleaf *lp = reinterpret_cast<bleaf*>(nodes_array[0][i]);
+#else
+        bleaf *lp = &(leaf[i]);
+#endif
         // compute number of keys in this leaf node
         int fillnum= leaf_fill_num; // in most cases
         if (i == nodenum-1) {
@@ -160,23 +183,29 @@ int lbtree::bulkloadSubtree(
         } // for each key in this leaf node
 
         // sibling pointer
+#ifdef PMEM_ALLOC
+        lp->next[0] = ((i<nodenum-1) ? reinterpret_cast<bleaf*>(nodes_array[0][i+1]) : NULL);
+#else
         lp->next[0]= ((i<nodenum-1) ? &(leaf[i+1]) : NULL);
+#endif
         lp->next[1]= NULL;
 
         // 2x8B meta
         lp->setBothWords(&leaf_meta);
 
-
         // populate nonleaf node
         Pointer8B child= lp;
-        key_type  left_key= lp->k(LEAF_KEY_NUM-fillnum);
+        key_type left_key= lp->k(LEAF_KEY_NUM-fillnum);
 
         // append (left_key, child) to level ll node
         // child is the level ll-1 node to be appended.
         // left_key is the left-most key in the subtree of child.
         for (int ll=1; ll<=top_level; ll++) {
+#ifdef PMDK_ALLOC
+           bnode *np = reinterpret_cast<bnode*>(nodes_array[ll][ncur[ll]]);
+#else
            bnode *np= ((bnode *)(pfirst[ll])) + ncur[ll];
-
+#endif
            // if the node has >=1 child
            if (np->num() >= 0) {
                int kk= np->num()+1;
@@ -184,7 +213,12 @@ int lbtree::bulkloadSubtree(
                np->num()= kk;
 
                if ((kk==nonleaf_fill_num)&&(ncur[ll]<n_nodes[ll]-1)) { 
-                   ncur[ll] ++; np ++;
+                   ncur[ll] ++; 
+#ifdef PMDK_ALLOC
+                   np = reinterpret_cast<bnode*>(nodes_array[ll][ncur[ll]]);
+#else
+                   np ++;
+#endif
                    np->lock()= 0; np->num()= -1;
                }
                break;
@@ -200,6 +234,13 @@ int lbtree::bulkloadSubtree(
 
     } // end of foreach leaf node
 
+#ifdef PMEM_ALLOC
+    // deallocate the memory
+    for(int i = 0; i <= top_level; ++i){
+      delete [] nodes_array[i];
+    }
+    delete [] nodes_array;
+#endif
     // 5. return
     return top_level;
 }
@@ -248,11 +289,21 @@ int lbtree::bulkloadToptree(
 
 
     // 3. allocate nodes
+#ifdef PMDK_ALLOC
+    Pointer8B** nodes_array = new (Pointer8B*)[top_level+1];
+#endif
     for (int i=cur_level+1; i<=top_level; i++) {
+#ifdef PMDK_ALLOC
+       nodes_array[i] = new Pointer8B[n_nodes[i]];
+       for(int j = 0; j < n_nodes[i]; ++j){
+          nodes_array[i][j] = alignedmalloc(sizeof(bnode));
+       }
+       pfirst[i] = nodes_array[i][0];
+#else
        pfirst[i]= mempool_alloc(sizeof(bnode) * n_nodes[i]);
+#endif
     }
        // mempool_alloc call exit if out of memory
-
 
     // 4. populate nodes
     for (int ll=cur_level+1; ll<=top_level; ll++) {
@@ -269,8 +320,11 @@ int lbtree::bulkloadToptree(
         // child is the level ll-1 node to be appended.
         // left_key is the left-most key in the subtree of child.
         for (int ll=cur_level+1; ll<=top_level; ll++) {
+#ifdef PMDK_ALLOC
+           bnode *np = reinterpret_cast<bnode*>(nodes_array[ll][ncur[ll]]);
+#else
            bnode *np= ((bnode *)(pfirst[ll])) + ncur[ll];
-
+#endif
            // if the node has >=1 child
            if (np->num() >= 0) {
                int kk= np->num()+1;
@@ -278,7 +332,12 @@ int lbtree::bulkloadToptree(
                np->num()= kk;
 
                if ((kk==nonleaf_fill_num)&&(ncur[ll]<n_nodes[ll]-1)) { 
-                   ncur[ll] ++; np ++;
+                   ncur[ll] ++;
+#ifdef PMDK_ALLOC
+                   np = reinterpret_cast<bnode*>(nodes_array[ll][ncur[ll]]);
+#else 
+                   np ++;
+#endif
                    np->lock()= 0; np->num()= -1;
                }
                break;
@@ -293,7 +352,12 @@ int lbtree::bulkloadToptree(
         } // for each nonleaf level
 
     } // end of foreach key
-
+#ifdef PMDK_ALLOC
+    for(int i = cur_level+1; i <= top_level; ++i){
+      delete [] nodes_array[i];
+    }
+    delete [] nodes_array;
+#endif
     // 5. return
     return top_level;
 }
@@ -335,8 +399,14 @@ bool free_above_level_nodes)
                        target_level, ptrs, keys, num_nodes,
                        free_above_level_nodes);
         }
-
-        if (free_above_level_nodes) mempool_free_node(p);
+//BT: FIXME, free all level nodes? what's the meanning?
+        if (free_above_level_nodes){
+#ifdef PMDK_ALLOC
+          my_alloc::BasePMPool::Free(p);
+#else
+          mempool_free_node(p);
+#endif
+        }
     }
 }
 
@@ -349,7 +419,7 @@ typedef struct BldThArgs {
     int top_level;  // output
     int n_nodes[32];  // output
     Pointer8B pfirst[32];  // output
-
+    Pointer8B plast[32];  // output
 } BldThArgs;
 
 //
@@ -368,7 +438,7 @@ int lbtree::bulkload (int keynum, keyInput *input, float bfill)
     if (num_threads == 1) {
         bta[0].top_level= bulkloadSubtree(
                                input, 0, keynum, bfill, 31,
-                               bta[0].pfirst, bta[0].n_nodes);
+                               bta[0].pfirst, bta[0].plast, bta[0].n_nodes);
         tree_meta->root_level=  bta[0].top_level;
         tree_meta->tree_root=   bta[0].pfirst[tree_meta->root_level];
         tree_meta->setFirstLeaf(bta[0].pfirst[0]);
@@ -404,7 +474,7 @@ int lbtree::bulkload (int keynum, keyInput *input, float bfill)
                        bta[i].top_level= bulkloadSubtree(
                                cursor, bta[i].start_key, bta[i].num_key,
                                bfill, 31,
-                               bta[i].pfirst, bta[i].n_nodes);
+                               bta[i].pfirst, bta[i].plast, bta[i].n_nodes);
                        input->closeCursor(cursor);
                     });
     }
@@ -412,8 +482,13 @@ int lbtree::bulkload (int keynum, keyInput *input, float bfill)
 
     // connect the sibling pointers
     for (int i=1; i<num_threads; i++) {
+#ifdef PMDK_ALLOC
+        bleaf *lp = reinterpret_cast<bleaf*>(bta[i-1].plast[0]);
+        lp->next[0] = bta[i].pfirst[0];
+#else
         bleaf *lp= (bleaf *)(bta[i-1].pfirst[0]) + bta[i-1].n_nodes[0] - 1;
         lp->next[0]= bta[i].pfirst[0];
+#endif
     }
 
 
@@ -617,8 +692,9 @@ Again2:
     }
 
     // 2. search nonleaf nodes
+
+    //BT: FIXME, what if root_level is changed?
     p = tree_meta->tree_root;
-    
     for (i=tree_meta->root_level; i>0; i--) {
         
         // prefetch the entire node
@@ -779,7 +855,12 @@ Again2:
     key_type split_key= lp->k(sorted_pos[split]);
 
     // 2.3 create new node
+#ifdef PMDK_ALLOC
+    bleaf *newp;
+    my_alloc::BasePMPool::Allocate((void**)&newp, sizeof(bleaf));
+#else
     bleaf * newp = (bleaf *)nvmpool_alloc_node(LEAF_SIZE);
+#endif
 
     // 2.4 move entries sorted_pos[split .. LEAF_KEY_NUM-1]
     uint16_t freed_slots= 0;
@@ -793,13 +874,13 @@ Again2:
     newp->bitmap= (((1<<(LEAF_KEY_NUM - split))-1) << split);
     newp->lock= 0; newp->alt= 0;
 
-       // remove freed slots from temp bitmap
+    // remove freed slots from temp bitmap
     meta.v.bitmap &= ~freed_slots;
 
     newp->next[0]= lp->next[lp->alt];
     lp->next[1-lp->alt]= newp;
 
-       // set alt in temp bitmap
+    // set alt in temp bitmap
     meta.v.alt= 1 - lp->alt;
 
     // 2.5 key > split_key: insert key into new node
@@ -907,7 +988,11 @@ Again2:
             }
             
             /* otherwise allocate a new non-leaf and redistribute the keys */
+#ifdef PMEM_ALLOC
+            newp = (bnode *)alignedmalloc(NONLEAF_SIZE);
+#else
             newp = (bnode *)mempool_alloc_node(NONLEAF_SIZE);
+#endif
             
             /* if key should be in the left node */
             if (pos <= LEFT_KEY_NUM) {
@@ -940,7 +1025,11 @@ Again2:
         } /* end of while loop */
         
         /* root was splitted !! add another level */
+#ifdef PMEM_ALLOC
+        newp = (bnode *)alignedmalloc(NONLEAF_SIZE);
+#else
         newp = (bnode *)mempool_alloc_node(NONLEAF_SIZE);
+#endif
         
         newp->num() = 1; newp->lock()= 1;
         newp->ch(0) = tree_meta->tree_root; newp->ch(1) = ptr; newp->k(1) = key;
@@ -1163,8 +1252,11 @@ Again3:
         }
 
      // free the deleted leaf node
+#ifdef PMDK_ALLOC
+     my_alloc::BasePMPool::Free(lp);
+#else
      nvmpool_free_node(lp);
-
+#endif     
   } // end of Part 2
 
     /* Part 3: non-leaf node */
@@ -1198,7 +1290,11 @@ Again3:
             }
 
             /* otherwise only 1 ptr */
+#ifdef PMDK_ALLOC
+            delete p;
+#else            
             mempool_free_node(p);
+#endif
 
             lev++;
         } /* end of while */
@@ -1208,7 +1304,11 @@ Again3:
         tree_meta->tree_root = p->ch(0); // running transactions will abort
         sfence();
 
+#ifdef PMDK_ALLOC
+        delete p;
+#else        
         mempool_free_node (p);
+#endif
         return;
     }
 }
@@ -1459,6 +1559,9 @@ void lbtree::check (Pointer8B pnode, int level, key_type &start, key_type &end, 
 /* ------------------------------------------------------------------------- */
 /*                              driver                                       */
 /* ------------------------------------------------------------------------- */
+
+//BT: The driver needs re-write, maybe use Dash's benchmark driver
+// After testing interger keys, transform it to template version to be more general
 tree * initTree(void *nvm_addr, bool recover)
 {
     tree *mytree = new lbtree(nvm_addr, recover);
@@ -1473,5 +1576,6 @@ int main (int argc, char *argv[])
 
     initUseful();
 
-    return parse_command (argc, argv);
+    return 0;
+    //return parse_command (argc, argv);
 }
