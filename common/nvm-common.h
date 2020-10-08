@@ -67,7 +67,7 @@ static inline
 void clwb2(void *start, void *end)
 {
   clwb(start);
-  if (getline(start) != getline(end)) {
+  if (GET_LINE(start) != GET_LINE(end)) {
     clwb(end);
   }
 }
@@ -80,8 +80,8 @@ void clwb2(void *start, void *end)
 static inline
 void clwbmore(void *start, void *end)
 { 
-  unsigned long long start_line= getline(start);
-  unsigned long long end_line= getline(end);
+  unsigned long long start_line= GET_LINE(start);
+  unsigned long long end_line= GET_LINE(end);
   do {
     clwb((char *)start_line);
     start_line += CACHE_LINE_SIZE;
@@ -127,7 +127,7 @@ static inline
 void clwb2(void *start, void *end)
 {
   num_clwb ++;
-  if (getline(start) != getline(end)) {
+  if (GET_LINE(start) != GET_LINE(end)) {
     num_clwb ++;
   }
   // printf("clwb2(%p, %p)\n", start, end);
@@ -136,8 +136,8 @@ void clwb2(void *start, void *end)
 static inline
 void clwbmore(void *start, void *end)
 {
-  unsigned long long start_line= getline(start);
-  unsigned long long end_line= getline(end);
+  unsigned long long start_line= GET_LINE(start);
+  unsigned long long end_line= GET_LINE(end);
   num_clwb += (end_line+CACHE_LINE_SIZE-start_line)/CACHE_LINE_SIZE;
 
   // printf("clwbmore(%p, %p)\n", start, end);
@@ -632,7 +632,7 @@ class NvmLog_Log {
     {
        flushLog();
 
-       pos->nextline_ptr_= (char *)getline(pos->next_ptr_);
+       pos->nextline_ptr_= (char *)GET_LINE(pos->next_ptr_);
        pos->version_= (pos->nextline_ptr_[0]&0x80);
     }
 

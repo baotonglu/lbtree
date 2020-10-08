@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <cstddef>
 #include <climits>
 #include <cstdlib>
