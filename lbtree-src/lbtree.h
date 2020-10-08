@@ -24,10 +24,6 @@
 
 #define PMDK_ALLOC 1
 
-#ifdef PMDK_ALLOC
-#include "allocator.h"
-#endif
-
 /* ---------------------------------------------------------------------- */
 
 /* In a non-leaf, there are NON_LEAF_KEY_NUM keys and NON_LEAF_KEY_NUM+1
