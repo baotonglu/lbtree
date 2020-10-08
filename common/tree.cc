@@ -215,11 +215,15 @@ int parse_command (int argc, char **argv)
 	    argc -= 2; argv += 2;
 	  }
 
+    // Initialize the memory pool
+    my_alloc::BasePMPool::Initialize(pool_name, pool_size);
+    my_alloc::BasePMPool::IncreaseAllocatorNum();
+
           // ---
           // mempool <size(MB)>
           // ---
           else if (strcmp (argv[0], "mempool") == 0) {
-            // get params    
+            // get params                
             if (argc < 2) usage (cmd);
             long long size = atoi(argv[1]);
             size *= MB;
@@ -229,7 +233,6 @@ int parse_command (int argc, char **argv)
                 fprintf(stderr, "need to set worker_thread_num first!\n");
                 exit(1);
             }
-
             // initialize mempool per worker thread
             the_thread_mempools.init(worker_thread_num, size, 4096);
           }
@@ -251,15 +254,17 @@ int parse_command (int argc, char **argv)
             }
 
             // initialize nvm pool and log per worker thread
-            the_thread_nvmpools.init(worker_thread_num, nvm_file_name, size);
+            //the_thread_nvmpools.init(worker_thread_num, nvm_file_name, size);
 
             // allocate a 4KB page for the tree in worker 0's pool
-            char *nvm_addr= (char *)nvmpool_alloc(4*KB);
+            //char *nvm_addr= (char *)nvmpool_alloc(4*KB);
+            char *nvm_addr;
+            my_alloc::BasePMPool::ZAllocate((void **)&nvm_addr, 4*KB);
             the_treep= initTree(nvm_addr, false);
 
             // log may not be necessary for some tree implementations
             // For simplicity, we just initialize logs.  This cost is low.
-            nvmLogInit(worker_thread_num);
+            //nvmLogInit(worker_thread_num);
 	  }
 
           // *****************************************************************

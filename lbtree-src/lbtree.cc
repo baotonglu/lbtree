@@ -1575,6 +1575,6 @@ int main (int argc, char *argv[])
 
     initUseful();
 
-    return 0;
-    //return parse_command (argc, argv);
+    //return 0;
+    return parse_command (argc, argv);
 }
