@@ -11,7 +11,6 @@
  *      
  * This file contains the main driver for experiments.
  */
-#include "allocator.h"   
 #include "tree.h"
 
 /* ------------------------------------------------------------------------ */
