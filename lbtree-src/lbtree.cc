@@ -275,8 +275,7 @@ int lbtree::bulkloadToptree(
 
     // 1. compute nonleaf number of keys
     int nonleaf_fill_num= (int)((float)NON_LEAF_KEY_NUM * bfill);
-    nonleaf_fill_num= max(nonleaf_fill_num, 1);
-
+    nonleaf_fill_num= MAX(nonleaf_fill_num, 1);
 
     // 2. compute number of nodes
     n_nodes[cur_level]= num_key;
@@ -290,7 +289,7 @@ int lbtree::bulkloadToptree(
 
     // 3. allocate nodes
 #ifdef PMDK_ALLOC
-    Pointer8B** nodes_array = new (Pointer8B*)[top_level+1];
+    Pointer8B** nodes_array = new Pointer8B *[top_level+1];
 #endif
     for (int i=cur_level+1; i<=top_level; i++) {
 #ifdef PMDK_ALLOC

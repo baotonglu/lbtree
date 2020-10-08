@@ -225,7 +225,7 @@ class lbtree: public tree {
   private:
     int bulkloadSubtree(keyInput *input, int start_key, int num_key, 
                         float bfill, int target_level,
-                        Pointer8B pfirst[], int n_nodes[]);
+                        Pointer8B pfirst[], Pointer8B plast[], int n_nodes[]);
     
     int bulkloadToptree(Pointer8B ptrs[], key_type keys[], int num_key,
                         float bfill, int cur_level, int target_level,
