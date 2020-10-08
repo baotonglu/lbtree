@@ -1,4 +1,4 @@
-#program once
+#pragma once
 /**
  * @file tree.cc
  * @author  Shimin Chen <shimin.chen@gmail.com>, Jihang Liu, Leying Chen
@@ -13,6 +13,8 @@
  * This file contains the main driver for experiments.
  */
 #include "tree.h"
+#include "allocator.h"   
+
 
 /* ------------------------------------------------------------------------ */
 /*               global variables                                           */
