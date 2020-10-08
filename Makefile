@@ -9,8 +9,8 @@ CFLAGS=-O3 -std=c++11 -pthread -mrtm -msse4.1 -mavx2
 INCLUDE=-I./common
 LIB=-lpmem -lpmemobj
 
-COMMON_DEPENDS= ./common/tree.h ./common/tree.cc ./common/keyinput.h ./common/mempool.h ./common/mempool.cc ./common/nodepref.h ./common/nvm-common.h ./common/nvm-common.cc ./common/performance.h ./common/allocator.h
-COMMON_SOURCES= ./common/tree.cc ./common/mempool.cc ./common/nvm-common.cc
+COMMON_DEPENDS= ./common/tree.h ./common/mytree.h ./common/keyinput.h ./common/mempool.h ./common/mempool.cc ./common/nodepref.h ./common/nvm-common.h ./common/nvm-common.cc ./common/performance.h ./common/allocator.h
+COMMON_SOURCES= ./common/mempool.cc ./common/nvm-common.cc
 
 # -----------------------------------------------------------------------------
 TARGETS=lbtree 

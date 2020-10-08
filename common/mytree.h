@@ -1,3 +1,4 @@
+#program once
 /**
  * @file tree.cc
  * @author  Shimin Chen <shimin.chen@gmail.com>, Jihang Liu, Leying Chen
@@ -194,10 +195,6 @@ int parse_command (int argc, char **argv)
 	if (argc < 2) usage (argv[0]);
 	char * cmd = argv[0];
 	argc --; argv ++;
-
-    // Initialize the memory pool
-    my_alloc::BasePMPool::Initialize(pool_name, pool_size);
-    my_alloc::BasePMPool::IncreaseAllocatorNum(); 
 
 	while (argc > 0) {
 

@@ -17,6 +17,8 @@
  */
 
 #include "lbtree.h"
+#include "allocator.h"   
+
 
 /* ----------------------------------------------------------------- *
  useful structure
@@ -1574,6 +1576,10 @@ int main (int argc, char *argv[])
     assert((sizeof(bnode) == NONLEAF_SIZE)&&(sizeof(bleaf) == LEAF_SIZE));
 
     initUseful();
+
+        // Initialize the memory pool
+    my_alloc::BasePMPool::Initialize(pool_name, pool_size);
+    my_alloc::BasePMPool::IncreaseAllocatorNum(); 
 
     return parse_command (argc, argv);
 }

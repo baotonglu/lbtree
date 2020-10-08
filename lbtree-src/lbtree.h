@@ -20,7 +20,7 @@
 #define _LBTREE_H
 /* ---------------------------------------------------------------------- */
 
-#include "tree.h"
+#include "mytree.h"
 
 #define PMDK_ALLOC 1
 

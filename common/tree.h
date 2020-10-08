@@ -25,7 +25,6 @@
 #include <atomic>
 
 #include <immintrin.h>
-#include "allocator.h"   
 
 /* ---------------------------------------------------------------------- */
 /*                            Default Parameters                          */
