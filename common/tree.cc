@@ -196,12 +196,16 @@ int parse_command (int argc, char **argv)
 	char * cmd = argv[0];
 	argc --; argv ++;
 
+    // Initialize the memory pool
+    my_alloc::BasePMPool::Initialize(pool_name, pool_size);
+    my_alloc::BasePMPool::IncreaseAllocatorNum(); 
+
 	while (argc > 0) {
 
           // *****************************************************************
           // Initialization
           // *****************************************************************
-          
+   
 	  // ---
 	  // thread  <worker_thread_num>
 	  // ---
@@ -214,11 +218,6 @@ int parse_command (int argc, char **argv)
 	    printf("number of worker threads is %d\n", worker_thread_num);
 	    argc -= 2; argv += 2;
 	  }
-
-    // Initialize the memory pool
-    my_alloc::BasePMPool::Initialize(pool_name, pool_size);
-    my_alloc::BasePMPool::IncreaseAllocatorNum();
-
           // ---
           // mempool <size(MB)>
           // ---
