@@ -89,10 +89,10 @@ int lbtree::bulkloadSubtree(
 
     // 1. compute leaf and nonleaf number of keys
     int leaf_fill_num= (int)((float)LEAF_KEY_NUM * bfill);
-    leaf_fill_num= max(leaf_fill_num, 1);
+    leaf_fill_num= MAX(leaf_fill_num, 1);
 
     int nonleaf_fill_num= (int)((float)NON_LEAF_KEY_NUM * bfill);
-    nonleaf_fill_num= max(nonleaf_fill_num, 1);
+    nonleaf_fill_num= MAX(nonleaf_fill_num, 1);
 
 
     // 2. compute number of nodes
@@ -108,7 +108,7 @@ int lbtree::bulkloadSubtree(
 #ifndef PMDK_ALLOC
     pfirst[0]= nvmpool_alloc(sizeof(bleaf) * n_nodes[0]);
 #else
-    Pointer8B** nodes_array = new (Pointer8B*)[top_level + 1]; 
+    Pointer8B** nodes_array = new Pointer8B *[top_level + 1]; 
     int leaf_num = n_nodes[0];
     nodes_array[0] = new Pointer8B[leaf_num];
     for(int i = 0; i < leaf_num; ++i){
@@ -152,7 +152,7 @@ int lbtree::bulkloadSubtree(
     // For-loop for all leaf nodes
     for (int i=0; i<nodenum; i++) {
 #ifdef PMDK_ALLOC
-        bleaf *lp = reinterpret_cast<bleaf*>(nodes_array[0][i]);
+        bleaf *lp = static_cast<bleaf*>(nodes_array[0][i]);
 #else
         bleaf *lp = &(leaf[i]);
 #endif
@@ -184,7 +184,7 @@ int lbtree::bulkloadSubtree(
 
         // sibling pointer
 #ifdef PMEM_ALLOC
-        lp->next[0] = ((i<nodenum-1) ? reinterpret_cast<bleaf*>(nodes_array[0][i+1]) : NULL);
+        lp->next[0] = ((i<nodenum-1) ? static_cast<bleaf*>(nodes_array[0][i+1]) : NULL);
 #else
         lp->next[0]= ((i<nodenum-1) ? &(leaf[i+1]) : NULL);
 #endif
@@ -202,7 +202,7 @@ int lbtree::bulkloadSubtree(
         // left_key is the left-most key in the subtree of child.
         for (int ll=1; ll<=top_level; ll++) {
 #ifdef PMDK_ALLOC
-           bnode *np = reinterpret_cast<bnode*>(nodes_array[ll][ncur[ll]]);
+           bnode *np = static_cast<bnode*>(nodes_array[ll][ncur[ll]]);
 #else
            bnode *np= ((bnode *)(pfirst[ll])) + ncur[ll];
 #endif
@@ -215,7 +215,7 @@ int lbtree::bulkloadSubtree(
                if ((kk==nonleaf_fill_num)&&(ncur[ll]<n_nodes[ll]-1)) { 
                    ncur[ll] ++; 
 #ifdef PMDK_ALLOC
-                   np = reinterpret_cast<bnode*>(nodes_array[ll][ncur[ll]]);
+                   np = static_cast<bnode*>(nodes_array[ll][ncur[ll]]);
 #else
                    np ++;
 #endif
@@ -320,7 +320,7 @@ int lbtree::bulkloadToptree(
         // left_key is the left-most key in the subtree of child.
         for (int ll=cur_level+1; ll<=top_level; ll++) {
 #ifdef PMDK_ALLOC
-           bnode *np = reinterpret_cast<bnode*>(nodes_array[ll][ncur[ll]]);
+           bnode *np = static_cast<bnode*>(nodes_array[ll][ncur[ll]]);
 #else
            bnode *np= ((bnode *)(pfirst[ll])) + ncur[ll];
 #endif
@@ -333,7 +333,7 @@ int lbtree::bulkloadToptree(
                if ((kk==nonleaf_fill_num)&&(ncur[ll]<n_nodes[ll]-1)) { 
                    ncur[ll] ++;
 #ifdef PMDK_ALLOC
-                   np = reinterpret_cast<bnode*>(nodes_array[ll][ncur[ll]]);
+                   np = static_cast<bnode*>(nodes_array[ll][ncur[ll]]);
 #else 
                    np ++;
 #endif
@@ -482,7 +482,7 @@ int lbtree::bulkload (int keynum, keyInput *input, float bfill)
     // connect the sibling pointers
     for (int i=1; i<num_threads; i++) {
 #ifdef PMDK_ALLOC
-        bleaf *lp = reinterpret_cast<bleaf*>(bta[i-1].plast[0]);
+        bleaf *lp = static_cast<bleaf*>(bta[i-1].plast[0]);
         lp->next[0] = bta[i].pfirst[0];
 #else
         bleaf *lp= (bleaf *)(bta[i-1].pfirst[0]) + bta[i-1].n_nodes[0] - 1;
