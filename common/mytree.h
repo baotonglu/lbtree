@@ -123,6 +123,7 @@ int compar_void_ptr(const void *p1, const void *p2)
 static inline int lookupTest(Int64 key[], int start, int end)
 {
        int found= 0;
+       int not_found = 0;
 
        for (int ii=start; ii<end; ii++) {
 
@@ -138,8 +139,14 @@ static inline int lookupTest(Int64 key[], int start, int end)
             }
           }
 
+          if(pos < 0){
+            not_found++;
+          }
+
        } // end of for
 
+       printf("Not found %d\n", not_found);
+       printf("Found %d\n", found);
        return found;
 }
 
