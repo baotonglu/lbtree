@@ -92,8 +92,8 @@ public:
           LOG_FATAL("Allocate: Allocation Error in PMEMoid 1");
         }
         //*ptr = pmemobj_direct(tmp_ptr);
-        uint64_t ptr_value = static_cast<uint64_t>(pmemobj_direct(tmp_ptr)) + 48;
-        *ptr = static_cast<void*>(ptr_value);
+        uint64_t ptr_value = (uint64_t)(pmemobj_direct(tmp_ptr)) + 48;
+        *ptr = (void*)(ptr_value);
     }
 
     static void ZAllocate(void** ptr, size_t size){
@@ -104,8 +104,8 @@ public:
           LOG_FATAL("Allocate: Allocation Error in PMEMoid 1");
         }
         //*ptr = pmemobj_direct(tmp_ptr);
-         uint64_t ptr_value = static_cast<uint64_t>(pmemobj_direct(tmp_ptr)) + 48;
-        *ptr = static_cast<void*>(ptr_value);
+         uint64_t ptr_value = (uint64_t)(pmemobj_direct(tmp_ptr)) + 48;
+        *ptr = (void*)(ptr_value);
     }
 
 
@@ -142,8 +142,8 @@ public:
     }
 
 	static void Free(void* p){
-        uint64_t ptr_value = static_cast<uint64_t>(p) - 48;
-        p = static_cast<void*>(ptr_value); 
+        uint64_t ptr_value = (uint64_t)(p) - 48;
+        p = (void*)(ptr_value); 
         auto ptr = pmemobj_oid(p);
         pmemobj_free(&ptr);
     }
