@@ -18,6 +18,7 @@
 
 #include "lbtree.h"
 
+int node_split = 0;
 
 /* ----------------------------------------------------------------- *
  useful structure
@@ -861,6 +862,8 @@ Again2:
     int split= (LEAF_KEY_NUM/2);  // [0,..split-1] [split,LEAF_KEY_NUM-1]
     key_type split_key= lp->k(sorted_pos[split]);
 
+    node_split++;
+
     // 2.3 create new node
 #ifdef PMDK_ALLOC
     bleaf *newp;
@@ -1589,5 +1592,8 @@ int main (int argc, char *argv[])
     my_alloc::BasePMPool::Initialize(pool_name, pool_size);
     my_alloc::BasePMPool::IncreaseAllocatorNum(); 
 
-    return parse_command (argc, argv);
+    parse_command (argc, argv);
+
+    std::cout << "Node Split = " << node_split << std::endl;
+    return 0;
 }
