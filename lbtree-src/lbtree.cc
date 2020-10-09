@@ -1462,6 +1462,7 @@ void lbtree::check (Pointer8B pnode, int level, key_type &start, key_type &end, 
 
         // get min max
         getMinMaxKey(lp, start, end);
+        printf("key_range (%lld - %lld)\n", start, end);
 
         // check fingerprints
         unsigned short bmp= lp->bitmap;
