@@ -17,7 +17,7 @@ cmdinit="$1 thread 2 mempool 50 nvmpool ${nvmfile} 200"
 echo 'debug_bulkload'
 echo -n 'Test  1: '
 rm -rf /mnt/pmme0/baotong/
-/usr/bin/hog-machine.sh ${cmdinit} debug_bulkload 123 1.0 
+/usr/bin/hog-machine.sh ${cmdinit} debug_bulkload 123 1.0 | grep good
 #echo -n 'Test  2: '
 #${cmdinit} debug_bulkload 500 0.9 | grep good
 #echo -n 'Test  3: '

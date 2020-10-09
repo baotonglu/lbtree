@@ -480,18 +480,18 @@ int lbtree::bulkload (int keynum, keyInput *input, float bfill)
     }
     for (int i=0; i<num_threads; i++) threads[i].join();
 
-    printf("entering linking phase\n");
+    //printf("entering linking phase\n");
     // connect the sibling pointers
     for (int i=1; i<num_threads; i++) {
 #ifdef PMDK_ALLOC
         bleaf *lp = static_cast<bleaf*>(bta[i-1].plast[0]);
         lp->next[0] = bta[i].pfirst[0];
-        key_type ss, ee;
-        getMinMaxKey(lp, ss, ee);
-        printf("Prev (%lld - %lld)", ss, ee);
-        lp = static_cast<bleaf*>(bta[i].pfirst[0]);
-        getMinMaxKey(lp, ss, ee);
-        printf("Next (%lld - %lld)", ss, ee);
+//        key_type ss, ee;
+//        getMinMaxKey(lp, ss, ee);
+//        printf("Prev (%lld - %lld)", ss, ee);
+//        lp = static_cast<bleaf*>(bta[i].pfirst[0]);
+//        getMinMaxKey(lp, ss, ee);
+//       printf("Next (%lld - %lld)", ss, ee);
 #else
         bleaf *lp= (bleaf *)(bta[i-1].pfirst[0]) + bta[i-1].n_nodes[0] - 1;
         lp->next[0]= bta[i].pfirst[0];
