@@ -184,7 +184,7 @@ int lbtree::bulkloadSubtree(
         } // for each key in this leaf node
 
         // sibling pointer
-#ifdef PMEM_ALLOC
+#ifdef PMDK_ALLOC
         lp->next[0] = ((i<nodenum-1) ? static_cast<bleaf*>(nodes_array[0][i+1]) : NULL);
 #else
         lp->next[0]= ((i<nodenum-1) ? &(leaf[i+1]) : NULL);
@@ -235,7 +235,7 @@ int lbtree::bulkloadSubtree(
 
     } // end of foreach leaf node
 
-#ifdef PMEM_ALLOC
+#ifdef PMDK_ALLOC
     // deallocate the memory
     for(int i = 0; i <= top_level; ++i){
       delete [] nodes_array[i];
@@ -995,7 +995,7 @@ Again2:
             }
             
             /* otherwise allocate a new non-leaf and redistribute the keys */
-#ifdef PMEM_ALLOC
+#ifdef PMDK_ALLOC
             newp = (bnode *)alignedmalloc(NONLEAF_SIZE);
 #else
             newp = (bnode *)mempool_alloc_node(NONLEAF_SIZE);
@@ -1032,7 +1032,7 @@ Again2:
         } /* end of while loop */
         
         /* root was splitted !! add another level */
-#ifdef PMEM_ALLOC
+#ifdef PMDK_ALLOC
         newp = (bnode *)alignedmalloc(NONLEAF_SIZE);
 #else
         newp = (bnode *)mempool_alloc_node(NONLEAF_SIZE);
@@ -1462,7 +1462,7 @@ void lbtree::check (Pointer8B pnode, int level, key_type &start, key_type &end, 
 
         // get min max
         getMinMaxKey(lp, start, end);
-        printf("key_range (%lld - %lld)\n", start, end);
+        //printf("key_range (%lld - %lld)\n", start, end);
 
         // check fingerprints
         unsigned short bmp= lp->bitmap;
