@@ -1563,8 +1563,9 @@ void lbtree::check (Pointer8B pnode, int level, key_type &start, key_type &end, 
 //BT: The driver needs re-write, maybe use Dash's benchmark driver
 // After testing interger keys, transform it to template version to be more general
 tree * initTree(void *nvm_addr, bool recover)
-{
+{   
     tree *mytree = new lbtree(nvm_addr, recover);
+    std::cout << "Successfully create a lbtree" << std::endl;
     return mytree;
 }
 
