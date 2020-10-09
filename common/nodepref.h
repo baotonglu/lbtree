@@ -199,6 +199,7 @@
 // for non leaf node
 static void inline NODE_PREF(register void *bbp)
 {
+    /*
      pref (* ((char *)bbp));
 #    if NONLEAF_LINE_NUM >= 2
      pref (* ((char *)bbp + CACHE_LINE_SIZE));
@@ -296,10 +297,12 @@ static void inline NODE_PREF(register void *bbp)
 #    if NONLEAF_LINE_NUM >= 33
 #    error "NONLEAF_LINE_NUM must be <= 32!"
 #    endif
+*/
 }
 
 static void inline LEAF_PREF(register void *bbp)
 {
+    /*
      pref (* ((char *)bbp));
 #    if LEAF_LINE_NUM >= 2
      pref (* ((char *)bbp + CACHE_LINE_SIZE));
@@ -397,6 +400,7 @@ static void inline LEAF_PREF(register void *bbp)
 #    if LEAF_LINE_NUM >= 33
 #    error "LEAF_LINE_NUM must be <= 32!"
 #    endif
+*/
 }
 
 #define NODE_PREF_ST        NODE_PREF
