@@ -1444,9 +1444,9 @@ void lbtree::check (Pointer8B pnode, int level, key_type &start, key_type &end, 
     if (level == 0) { // leaf node
         bleaf *lp = pnode;
 
-        if (((unsigned long long)lp)%256 != 0) {
-            printf ("leaf(%p): not aligned at 256B\n", lp); exit (1);
-        }
+//        if (((unsigned long long)lp)%256 != 0) {
+//            printf ("leaf(%p): not aligned at 256B\n", lp); exit (1);
+//        }
         
         // check number of keys
         if (lp->num() < 1) {// empty node!

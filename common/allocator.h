@@ -86,12 +86,14 @@ public:
 
     static void Allocate(void** ptr, size_t size){
         PMEMoid tmp_ptr;
-        auto ret = pmemobj_alloc(pm_pool_, &tmp_ptr, size, TOID_TYPE_NUM(char), NULL, NULL);
+        auto ret = pmemobj_alloc(pm_pool_, &tmp_ptr, size + 64, TOID_TYPE_NUM(char), NULL, NULL);
         if (ret) {
           std::cout << "Fail logging: " << ret << "; Size = " << size << std::endl;
           LOG_FATAL("Allocate: Allocation Error in PMEMoid 1");
         }
-        *ptr = pmemobj_direct(tmp_ptr);
+        //*ptr = pmemobj_direct(tmp_ptr);
+        uint64_t ptr_value = static_cast<uint64_t>(pmemobj_direct(tmp_ptr)) + 48;
+        *ptr = static_cast<void*>(ptr_value);
     }
 
     static void ZAllocate(void** ptr, size_t size){
@@ -101,7 +103,9 @@ public:
           std::cout << "Fail logging: " << ret << "; Size = " << size << std::endl;
           LOG_FATAL("Allocate: Allocation Error in PMEMoid 1");
         }
-        *ptr = pmemobj_direct(tmp_ptr);
+        //*ptr = pmemobj_direct(tmp_ptr);
+         uint64_t ptr_value = static_cast<uint64_t>(pmemobj_direct(tmp_ptr)) + 48;
+        *ptr = static_cast<void*>(ptr_value);
     }
 
 
@@ -137,7 +141,9 @@ public:
         all_deallocated++;
     }
 
-	static void Free(void* p){ 
+	static void Free(void* p){
+        uint64_t ptr_value = static_cast<uint64_t>(p) - 48;
+        p = static_cast<void*>(ptr_value); 
         auto ptr = pmemobj_oid(p);
         pmemobj_free(&ptr);
     }
