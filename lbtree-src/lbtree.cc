@@ -865,6 +865,8 @@ Again2:
 #ifdef PMDK_ALLOC
     bleaf *newp;
     my_alloc::BasePMPool::Allocate((void**)&newp, sizeof(bleaf));
+    printf("Allocate new leaf node, need to quit\n");
+    exit(-1);
 #else
     bleaf * newp = (bleaf *)nvmpool_alloc_node(LEAF_SIZE);
 #endif
