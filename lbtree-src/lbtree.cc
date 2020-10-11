@@ -1595,5 +1595,6 @@ int main (int argc, char *argv[])
     parse_command (argc, argv);
 
     std::cout << "Node Split = " << node_split << std::endl;
+    my_alloc::BasePMPool::get_collected();
     return 0;
 }

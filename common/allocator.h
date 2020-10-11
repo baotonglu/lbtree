@@ -41,6 +41,7 @@ public:
     static char *all_tables;
     static uint64_t all_allocated;
     static uint64_t all_deallocated;
+    static uint64_t collect_allocated;
 
     static void Initialize(const char* pool_name, size_t pool_size){
         if (!FileExists(pool_name)) {
@@ -94,6 +95,11 @@ public:
         //*ptr = pmemobj_direct(tmp_ptr);
         uint64_t ptr_value = (uint64_t)(pmemobj_direct(tmp_ptr)) + 48;
         *ptr = (void*)(ptr_value);
+        collect_allocated++;
+    }
+
+    static void get_collected(){ 
+        std::cout << "I have allocate blocks " << collect_allocated << std::endl;
     }
 
     static void ZAllocate(void** ptr, size_t size){
@@ -247,4 +253,5 @@ PMEMoid BasePMPool::p_all_tables = OID_NULL;
 char* BasePMPool::all_tables = nullptr;
 uint64_t BasePMPool::all_allocated = 0;
 uint64_t BasePMPool::all_deallocated = 0;
+uint64_t BasePMPool::collect_allocated = 0;
 }
