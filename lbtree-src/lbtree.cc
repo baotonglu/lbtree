@@ -453,8 +453,8 @@ int lbtree::bulkload (int keynum, keyInput *input, float bfill)
         // if this assertion is false, then the tree has > 31 levels
         assert(bta[0].n_nodes[bta[0].top_level] == 1);
 
-    std::cout << "Used PM = " << size_of_PM << std::endl;
-    std::cout << "Used DRAM = " << size_of_DRAM << std::endl;
+    std::cout << "Used PM = " << size_of_PM / (1024. * 1024. * 1024.) << std::endl;
+    std::cout << "Used DRAM = " << size_of_DRAM / (1024. * 1024. * 1024.)<< std::endl;
 
         delete[] bta;
         return tree_meta->root_level;
