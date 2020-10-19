@@ -17,8 +17,11 @@
  */
 
 #include "lbtree.h"
+#include <cstdint>
 
 int node_split = 0;
+uint64_t size_of_PM = 0;
+uint64_t size_of_DRAM = 0;
 
 /* ----------------------------------------------------------------- *
  useful structure
@@ -115,6 +118,7 @@ int lbtree::bulkloadSubtree(
     nodes_array[0] = new Pointer8B[leaf_num];
     for(int i = 0; i < leaf_num; ++i){
       my_alloc::BasePMPool::ZAllocate((void**)&nodes_array[0][i], sizeof(bleaf));
+      size_of_PM += sizeof(bleaf);
     }
     pfirst[0] = nodes_array[0][0];
     plast[0] = nodes_array[0][leaf_num - 1];
@@ -128,6 +132,7 @@ int lbtree::bulkloadSubtree(
        nodes_array[i] = new Pointer8B[n_nodes[i]];
        for(int j = 0; j < n_nodes[i]; ++j){
           nodes_array[i][j] = alignedmalloc(sizeof(bnode));
+          size_of_DRAM += sizeof(bnode);
        }
        pfirst[i] = nodes_array[i][0];
 #endif
@@ -437,6 +442,7 @@ int lbtree::bulkload (int keynum, keyInput *input, float bfill)
 
     // 2. one thread?
     if (num_threads == 1) {
+      std::cout << "use single-thread to bulkload" << std::endl;
         bta[0].top_level= bulkloadSubtree(
                                input, 0, keynum, bfill, 31,
                                bta[0].pfirst, bta[0].plast, bta[0].n_nodes);
@@ -1595,6 +1601,8 @@ int main (int argc, char *argv[])
     parse_command (argc, argv);
 
     std::cout << "Node Split = " << node_split << std::endl;
+    std::cout << "Used PM = " << size_of_PM << std::endl;
+    std::cout << "Used DRAM = " << size_of_DRAM << std::endl;
     my_alloc::BasePMPool::get_collected();
     return 0;
 }
