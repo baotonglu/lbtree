@@ -95,7 +95,7 @@ public:
         //*ptr = pmemobj_direct(tmp_ptr);
         uint64_t ptr_value = (uint64_t)(pmemobj_direct(tmp_ptr)) + 48;
         *ptr = (void*)(ptr_value);
-        collect_allocated++;
+        //collect_allocated++;
     }
 
     static void get_collected(){ 

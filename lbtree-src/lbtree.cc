@@ -862,7 +862,7 @@ Again2:
     int split= (LEAF_KEY_NUM/2);  // [0,..split-1] [split,LEAF_KEY_NUM-1]
     key_type split_key= lp->k(sorted_pos[split]);
 
-    node_split++;
+    //node_split++;
 
     // 2.3 create new node
 #ifdef PMDK_ALLOC
