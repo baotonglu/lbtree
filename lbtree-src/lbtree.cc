@@ -823,13 +823,14 @@ Again2:
        // 1.3 line 0: 0-2; line 1: 3-6; line 2: 7-10; line 3: 11-13
        // in line 0?
        if (slot<3) {
+           my_alloc::BasePMPool::Persist(&(lp->k(slot)), 16);
            // 1.3.1 write word 0
            meta.v.bitmap= bitmap;
            lp->setWord0(&meta);
 
            // 1.3.2 flush
            //clwb(lp); sfence();
-           my_alloc::BasePMPool::Persist(lp, 64);
+           my_alloc::BasePMPool::Persist(lp, 16);
 
            return;
        }
@@ -851,13 +852,13 @@ Again2:
 
          // 1.4.2 flush the line containing slot
          //clwb(&(lp->k(slot))); sfence();
-         my_alloc::BasePMPool::Persist(&(lp->k(slot)), 64);
+         my_alloc::BasePMPool::Persist(&(lp->k(slot)), 16);
 
          // 1.4.3 change meta and flush line 0
          meta.v.bitmap= bitmap;
          lp->setBothWords(&meta);
          //clwb(lp); sfence();
-         my_alloc::BasePMPool::Persist(lp, 64);
+         my_alloc::BasePMPool::Persist(lp, 16);
 
          return;
        }
