@@ -21,6 +21,7 @@
 /* ---------------------------------------------------------------------- */
 
 #include "mytree.h"
+#include <emmintrin.h>
 
 #define PMDK_ALLOC 1
 
@@ -139,6 +140,13 @@ typedef union bleafMeta {
     } v;
 } bleafMeta;
 
+void movnt64(uint64_t *dest, uint64_t const src, bool front, bool back) {
+    assert(((uint64_t)dest & 7) == 0);
+    if (front) mfence();
+    _mm_stream_si64((long long int *)dest, (long long int) src);
+    if (back) mfence();
+}
+
 /**
  * bleaf: leaf node
  *
@@ -171,6 +179,19 @@ public:
     void setWord0(bleafMeta *m) {
        bleafMeta * my_meta= (bleafMeta *)this;
        my_meta->word8B[0]= m->word8B[0];
+    }
+
+    void setWord0_temporal(bleafMeta *m){
+       bleafMeta * my_meta= (bleafMeta *)this;
+       movnt64((uint64_t*)&my_meta->word8B[0], m->word8B[0], false, true);
+       //my_meta->word8B[0]= m->word8B[0];
+    }
+
+    void setBothWords_temporal(bleafMeta *m) {
+       bleafMeta * my_meta= (bleafMeta *)this;
+       my_meta->word8B[1]= m->word8B[1];
+       //my_meta->word8B[0]= m->word8B[0];
+       movnt64((uint64_t*)&my_meta->word8B[0], m->word8B[0], false, true);
     }
 
 }; // bleaf

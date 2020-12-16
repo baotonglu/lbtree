@@ -807,7 +807,7 @@ Again2:
     /* 1. leaf is not full */
     if (! isfull[0]) {
 
-       meta.v.lock= 1;  // clear lock in temp meta
+       meta.v.lock= 0;  // clear lock in temp meta
 
        // 1.1 get first empty slot
        uint16_t bitmap= meta.v.bitmap;
@@ -826,13 +826,14 @@ Again2:
            //my_alloc::BasePMPool::Persist(&(lp->k(slot)), 16);
            // 1.3.1 write word 0
            meta.v.bitmap= bitmap;
-           lp->setWord0(&meta);
+           //lp->setWord0(&meta);
+           lp->setWord0_temporal(&meta);
 
            // 1.3.2 flush
            //clwb(lp); sfence();
-           my_alloc::BasePMPool::Persist(lp, 16);
-           meta.v.lock = 0;
-           lp->setWord0(&meta);
+           //my_alloc::BasePMPool::Persist(lp, 16);
+           //meta.v.lock = 0;
+           //lp->setWord0(&meta);
 
            return;
        }
@@ -858,11 +859,11 @@ Again2:
 
          // 1.4.3 change meta and flush line 0
          meta.v.bitmap= bitmap;
-         lp->setBothWords(&meta);
+         lp->setBothWords_temporal(&meta);
          //clwb(lp); sfence();
-         my_alloc::BasePMPool::Persist(lp, 16);
-         meta.v.lock = 0;
-         lp->setBothWords(&meta);
+         //my_alloc::BasePMPool::Persist(lp, 16);
+         //meta.v.lock = 0;
+         //lp->setBothWords(&meta);
 
          return;
        }
