@@ -924,12 +924,12 @@ Again2:
     LOOP_FLUSH(clwb, newp, LEAF_LINE_NUM); 
     //clwb(&(lp->next[0]));
     //sfence();
-    my_alloc::BasePMPool::Persist(&(lp->next[0]), 64);
+    my_alloc::BasePMPool::Persist(&(lp->next[0]), 8);
 
     // 2.7 clwb lp and flush: NVM atomic write to switch alt and set bitmap
     lp->setBothWords(&meta);
     //clwb(lp); sfence();
-    my_alloc::BasePMPool::Persist(lp, 64);
+    my_alloc::BasePMPool::Persist(lp, 16);
 
     // 2.8 key < split_key: insert key into old node 
     if (key <= split_key) {
@@ -956,7 +956,7 @@ Again2:
            lp->setWord0(&meta);
            // flush
            //clwb(lp); sfence();
-           my_alloc::BasePMPool::Persist(lp, 64);
+           my_alloc::BasePMPool::Persist(lp, 8);
        }
        // line 1--3
        else {
@@ -975,13 +975,13 @@ Again2:
 
          // flush the line containing slot
          //clwb(&(lp->k(slot))); sfence();
-         my_alloc::BasePMPool::Persist(&(lp->k(slot)), 64);
+         my_alloc::BasePMPool::Persist(&(lp->k(slot)), 16);
 
          // change meta and flush line 0
          meta.v.bitmap= bitmap;
          lp->setBothWords(&meta);
          //clwb(lp); sfence();
-         my_alloc::BasePMPool::Persist(lp, 64);
+         my_alloc::BasePMPool::Persist(lp, 16);
        }
     }
 
@@ -1262,7 +1262,7 @@ Again3:
        meta.v.bitmap &= ~(1<<ppos[0]);  // mark the bitmap to delete the entry
        lp->setWord0(&meta);
        //clwb(lp); sfence();
-       my_alloc::BasePMPool::Persist(lp, 64);
+       my_alloc::BasePMPool::Persist(lp, 8);
 
        return;
 
@@ -1275,7 +1275,7 @@ Again3:
             // remove it from sibling linked list
             leaf_sibp->next[leaf_sibp->alt]= lp->next[lp->alt];
             //clwb(&(leaf_sibp->next[0])); sfence();
-            my_alloc::BasePMPool::Persist(&(leaf_sibp->next[0]), 64);
+            my_alloc::BasePMPool::Persist(&(leaf_sibp->next[0]), 8);
 
             leaf_sibp->lock=0;  // lock bit is not protected.  
                                 // It will be reset in recovery
