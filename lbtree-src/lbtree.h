@@ -141,7 +141,7 @@ typedef union bleafMeta {
 } bleafMeta;
 
 void movnt64(uint64_t *dest, uint64_t const src, bool front, bool back) {
-    assert(((uint64_t)dest & 7) == 0);
+    //assert(((uint64_t)dest & 7) == 0);
     if (front) sfence();
     _mm_stream_si64((long long int *)dest, (long long int) src);
     if (back) sfence();

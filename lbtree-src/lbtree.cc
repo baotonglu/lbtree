@@ -23,6 +23,8 @@ int node_split = 0;
 uint64_t size_of_PM = 0;
 uint64_t size_of_DRAM = 0;
 
+//#define NONTEMP 1
+
 /* ----------------------------------------------------------------- *
  useful structure
  * ----------------------------------------------------------------- */
@@ -826,11 +828,14 @@ Again2:
            //my_alloc::BasePMPool::Persist(&(lp->k(slot)), 16);
            // 1.3.1 write word 0
            meta.v.bitmap= bitmap;
-           //lp->setWord0(&meta);
+#ifdef NONTEMP           
            lp->setWord0_temporal(&meta);
+#else
+           lp->setWord0(&meta);
 
            // 1.3.2 flush
-           //clwb(lp); sfence();
+           clwb(lp); sfence();
+#endif
            //my_alloc::BasePMPool::Persist(lp, 16);
            //meta.v.lock = 0;
            //lp->setWord0(&meta);
@@ -859,7 +864,12 @@ Again2:
 
          // 1.4.3 change meta and flush line 0
          meta.v.bitmap= bitmap;
+#ifdef NONTEMP         
          lp->setBothWords_temporal(&meta);
+#else
+         lp->setBothWords(&meta);
+         clwb(lp); sfence();
+#endif
          //clwb(lp); sfence();
          //my_alloc::BasePMPool::Persist(lp, 16);
          //meta.v.lock = 0;
