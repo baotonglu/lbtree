@@ -9,7 +9,7 @@
 ./keygen 100000000 random dbg-search500
 
 # insert keys are randomly ordered and are not in bulkload keys
-./getinsert 100000000 dbg-k50k 100000000 dbg-insert500
+./getinsert 100000000 dbg-k50k 250000000 dbg-insert500
 
 # delete keys are randomly ordered and must be in bulkload keys
 ./getdelete 100000000 dbg-k50k 100000000 dbg-delete500
