@@ -702,10 +702,8 @@ void lbtree::insert (key_type key, void *ptr)
     key_type r;
     
 Again2:
-    std::cout << "inserting key " << key << std::endl;
     // 1. RTM begin
     if(_xbegin() != _XBEGIN_STARTED) {
-        std::cout << "wheterh back" << std::endl;
         // random backoff
         // sum= 0; 
         // for (int i=(rdtsc() % 1024); i>0; i--) sum += i;
@@ -744,7 +742,6 @@ Again2:
         
     inner_done: ;
     }
-    std::cout << "start searching leaf nodes" << std::endl;
     // 3. search leaf node
     lp= (bleaf *)p;
 
@@ -755,7 +752,6 @@ Again2:
     if (lp->lock) {_xabort(4); goto Again2;}
 
     parray[0]= lp;
-    std::cout << "start the SIMD cmp" << std::endl;
     // SIMD comparison
        // a. set every byte to key_hash in a 16B register 
     __m128i key_16B = _mm_set1_epi8((char)key_hash);
@@ -797,7 +793,6 @@ Again2:
         }
     }
 
-    std::cout << "before txn end" << std::endl;
 
     // 5. RTM commit
     _xend();
@@ -809,7 +804,6 @@ Again2:
     bleaf *lp= parray[0];
     bleafMeta meta= *((bleafMeta *)lp);
 
-    std::cout << "I am in leaf node" << std::endl;
     /* 1. leaf is not full */
     if (! isfull[0]) {
 
