@@ -150,6 +150,7 @@ int main (int argc, char *argv[])
     }
     
     // remove duplicates
+    /*
     do {
         qsort (insertion, insertnum, sizeof(Int64), compare);
         count = 0;
@@ -163,9 +164,10 @@ int main (int argc, char *argv[])
     } while (count > 0);
     
     // shuffle the insertion keys
-    shuffle(insertion, keys, insertnum);
-    
-    write_once (output_file, keys, insertnum*sizeof(Int64));
+    //shuffle(insertion, keys, insertnum);
+    */
+    //write_once (output_file, keys, insertnum*sizeof(Int64));
+    write_once (output_file, insertion, insertnum*sizeof(Int64));
     
     /* free memory */
     free (insertion); free (keys);
