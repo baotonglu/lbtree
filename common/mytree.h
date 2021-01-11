@@ -14,7 +14,9 @@
  */
 #include "tree.h"
 #include "allocator.h"   
-
+#include "uniform.h"
+#include <random>
+#include <chrono>
 
 /* ------------------------------------------------------------------------ */
 /*               global variables                                           */
@@ -172,6 +174,33 @@ static inline int insertTest(Int64 key[], int start, int end)
        }
 
        return found;
+}
+
+static inline int mixedTest(Int64 key[], int start, int end)
+{
+      unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
+      std::mt19937_64 g2 (seed1);
+      uint64_t u64Random = g2();
+      UniformRandom rng(U64Random);
+      uint32_t random;
+      uint32_t not_found = 0;
+      uint32_t insert_sign = 50; // 50% are inserts
+      
+      for (int ii=start; ii<end; ii++) {
+        random = rng.next_uint32() % 100;
+        key_type kk= key[ii];
+        if (random < insert_sign) { 
+          the_treep->insert (kk, (void *) kk);
+        } else { 
+          void *p;
+          int pos;
+          p = the_treep->lookup (kk, &pos);
+          if(pos < 0) not_found++;
+        }
+      }
+
+      std::cout << "Not found = " << not_found << std::endl;
+      return found;
 }
 
 /**
@@ -908,6 +937,75 @@ int parse_command (int argc, char **argv)
                 // worker_thread_num == 1
                 else {
                   found= insertTest(key, 0, keynum);
+                }
+            }while(0))
+
+#ifdef NVMFLUSH_STAT
+	    NVMFLUSH_STAT_print();
+#endif
+
+            if (debug_test) {
+
+              printf ("Insert %d keys / %d keys\n", found.load(), keynum);
+
+              key_type start, end;
+              the_treep->check (&start, &end);
+
+              if (found.load() == keynum) {
+                  printf ("Insertion is good!\n");
+              }
+              else {
+                  printf ("%d keys are not successfully inserted!\n", keynum - found.load());
+              }
+            }
+
+            free (key);
+          }
+
+          else if (strcmp (argv[0], "mixed") == 0) {
+            // mixed testing
+            // get params
+            if (argc < 3) usage (cmd);
+            int keynum = atoi (argv[1]);
+            char *keyfile = argv[2];
+            argc -= 3; argv += 3;
+
+            printf ("-- insert %d %s\n", keynum, keyfile);
+
+            // get keys from the file
+            Int64 * key = getKeys (keyfile, keynum);
+
+            // test
+            unsigned long long total_us= 0;
+
+            std::thread threads[worker_thread_num];
+            int range= floor(keynum, worker_thread_num);
+            std::atomic<int> found;
+            found= 0;
+
+            clear_cache ();
+
+#ifdef NVMFLUSH_STAT
+	    NVMFLUSH_STAT_init();
+#endif
+
+            TEST_PERFORMANCE(total_us, do {
+                if (worker_thread_num > 1) {
+                  for (int t=0; t<worker_thread_num; t++) {
+                      threads[t] = std::thread ( [=, &found](){
+                           worker_id= t;
+                           int start= range*t;
+                           int end= ((t < worker_thread_num-1) ? start+range: keynum);
+                           int th_found= mixedTest(key, start, end);
+                           if (debug_test) found.fetch_add(th_found);
+                      });
+                  }
+                  for (int t=0; t<worker_thread_num; t++) threads[t].join();
+                } // end worker_thread_num > 1
+
+                // worker_thread_num == 1
+                else {
+                  found= mixedTest(key, 0, keynum);
                 }
             }while(0))
 

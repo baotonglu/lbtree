@@ -23,7 +23,7 @@ int node_split = 0;
 uint64_t size_of_PM = 0;
 uint64_t size_of_DRAM = 0;
 
-//#define NONTEMP 1
+#define NONTEMP 1
 
 /* ----------------------------------------------------------------- *
  useful structure
