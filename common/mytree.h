@@ -178,7 +178,8 @@ static inline int insertTest(Int64 key[], int start, int end)
 
 static inline int mixedTest(Int64 key[], int start, int end)
 {
-      unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
+      int found = 0;
+      unsigned seed1  = std::chrono::system_clock::now().time_since_epoch().count();
       std::mt19937_64 g2 (seed1);
       uint64_t u64Random = g2();
       UniformRandom rng(U64Random);
@@ -484,7 +485,7 @@ int parse_command (int argc, char **argv)
             int level = the_treep->bulkload (1, input, bfill);
 
             // insertion: keynum-1 keys
-            int keys_per_thread= floor(keynum-1, worker_thread_num);
+            int keys_per_thread= FLOOR(keynum-1, worker_thread_num);
 
             // run tests with multiple threads
 	    std::thread threads[worker_thread_num];
@@ -541,7 +542,7 @@ int parse_command (int argc, char **argv)
 	    the_treep->randomize();
 
             // insertion: keynum even keys
-            int keys_per_thread= floor(keynum, worker_thread_num);
+            int keys_per_thread= FLOOR(keynum, worker_thread_num);
 
             // run tests with multiple threads
 	    std::thread threads[worker_thread_num];
@@ -627,7 +628,7 @@ int parse_command (int argc, char **argv)
 	    the_treep->randomize();
 
             // delete half of the keys
-	    {int range= floor(keynum, worker_thread_num);
+	    {int range= FLOOR(keynum, worker_thread_num);
              if (range % 2 ==1) range=range-1;  // ensure range is even number
 
              std::thread threads[worker_thread_num];
@@ -649,7 +650,7 @@ int parse_command (int argc, char **argv)
             the_treep->check (&start, &end);
 
             // duplicate deletions: do the same deletions again
-	    {int range= floor(keynum, worker_thread_num);
+	    {int range= FLOOR(keynum, worker_thread_num);
              if (range % 2 ==1) range=range-1;  // ensure range is even number
 
              std::thread threads[worker_thread_num];
@@ -678,7 +679,7 @@ int parse_command (int argc, char **argv)
 	    for (skey=keynum*3/4; skey>=keynum/2+2; skey -= step, step=(step>2?(step/2):2)) {
 
                // delete ekey, ekey-2, ekey-4, ... > skey
-	       {int range= floor(ekey-skey, worker_thread_num);
+	       {int range= FLOOR(ekey-skey, worker_thread_num);
                 if (range % 2 ==1) range=range-1;  // ensure range is even number
 
                 std::thread threads[worker_thread_num];
@@ -707,7 +708,7 @@ int parse_command (int argc, char **argv)
             skey = 1;
 	    for (ekey=keynum/4; ekey<=keynum/2-2; ekey += step, step=(step>2?(step/2):2)) {
                // delete skey, skey+2, skey+4, ... , <ekey
-	       {int range= floor(ekey-skey, worker_thread_num);
+	       {int range= FLOOR(ekey-skey, worker_thread_num);
                 if (range % 2 ==1) range=range-1;  // ensure range is even number
 
                 std::thread threads[worker_thread_num];
@@ -804,7 +805,7 @@ int parse_command (int argc, char **argv)
 		     bulkload_num, level);
 
             // insertion: [bulkload_num, keynum-1], keynum-bulkload_num keys
-            int range= floor(keynum-bulkload_num, worker_thread_num);
+            int range= FLOOR(keynum-bulkload_num, worker_thread_num);
 
             // run tests with multiple threads
             std::thread threads[worker_thread_num];
@@ -857,7 +858,7 @@ int parse_command (int argc, char **argv)
             unsigned long long total_us= 0;
 
 	    std::thread threads[worker_thread_num];
-            int range= floor(keynum, worker_thread_num);
+            int range= FLOOR(keynum, worker_thread_num);
             std::atomic<int> found;
             found= 0;
 
@@ -910,7 +911,7 @@ int parse_command (int argc, char **argv)
             unsigned long long total_us= 0;
 
             std::thread threads[worker_thread_num];
-            int range= floor(keynum, worker_thread_num);
+            int range= FLOOR(keynum, worker_thread_num);
             std::atomic<int> found;
             found= 0;
 
@@ -979,7 +980,7 @@ int parse_command (int argc, char **argv)
             unsigned long long total_us= 0;
 
             std::thread threads[worker_thread_num];
-            int range= floor(keynum, worker_thread_num);
+            int range= FLOOR(keynum, worker_thread_num);
             std::atomic<int> found;
             found= 0;
 
@@ -1050,7 +1051,7 @@ int parse_command (int argc, char **argv)
             unsigned long long total_us= 0;
 
             std::thread threads[worker_thread_num];
-            int range= floor(keynum, worker_thread_num);
+            int range= FLOOR(keynum, worker_thread_num);
             std::atomic<int> found;
             found= 0;
 

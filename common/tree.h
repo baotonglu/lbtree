@@ -99,7 +99,7 @@ static inline unsigned long long rdtsc(void)
 
 // compute ceiling(x/y) and floor(x/y)
 #define ceiling(x, y)  (((x) + (y) - 1) / (y))
-#define floor(x, y)    ((x) / (y))
+#define FLOOR(x, y)    ((x) / (y))
 
 #define SWAP(x, y) \
 do { auto _t=(x); (x)=(y); (y)=_t; } while(0)
