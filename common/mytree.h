@@ -182,7 +182,7 @@ static inline int mixedTest(Int64 key[], int start, int end)
       unsigned seed1  = std::chrono::system_clock::now().time_since_epoch().count();
       std::mt19937_64 g2 (seed1);
       uint64_t u64Random = g2();
-      UniformRandom rng(U64Random);
+      UniformRandom rng(u64Random);
       uint32_t random;
       uint32_t not_found = 0;
       uint32_t insert_sign = 50; // 50% are inserts
