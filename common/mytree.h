@@ -923,6 +923,7 @@ int parse_command (int argc, char **argv)
 
             TEST_PERFORMANCE(total_us, do {
                 if (worker_thread_num > 1) {
+                  std::cout << "start the concurrent test" << std::endl;
                   for (int t=0; t<worker_thread_num; t++) {
                       threads[t] = std::thread ( [=, &found](){
                            worker_id= t;
@@ -937,6 +938,7 @@ int parse_command (int argc, char **argv)
 
                 // worker_thread_num == 1
                 else {
+                  std::cout << "start the test" << std::endl;
                   found= insertTest(key, 0, keynum);
                 }
             }while(0))
