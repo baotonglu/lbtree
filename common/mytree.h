@@ -161,7 +161,6 @@ static inline int insertTest(Int64 key[], int start, int end)
 
        for (int ii=start; ii<end; ii++) {
           key_type kk= key[ii];
-          std::cout << "insert key " << kk << std::endl;
           the_treep->insert (kk, (void *) kk);
        } // end of for
 
