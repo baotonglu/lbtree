@@ -773,7 +773,7 @@ int parse_command (int argc, char **argv)
       total_key_num = keynum;
       load_binary_data(keys, keynum, key_file_path);
        std::sort(keys, keys + keynum / 2,
-            [](auto const& a, auto const& b) { return a < b; });
+            [](key_type const& a, key_type const& b) { return a < b; });
   std::cout << "Start the bulk load" << std::endl;
       int level = the_treep->bulkload (keynum / 2, keys, bfill);
 #else
