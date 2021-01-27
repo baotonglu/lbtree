@@ -18,6 +18,7 @@
 #include "utils.h"
 #include <random>
 #include <chrono>
+#include <algorithm>
 /* ------------------------------------------------------------------------ */
 /*               global variables                                           */
 /* ------------------------------------------------------------------------ */
@@ -771,6 +772,9 @@ int parse_command (int argc, char **argv)
       keys = new key_type[keynum];
       total_key_num = keynum;
       load_binary_data(keys, keynum, key_file_path);
+       std::sort(keys, keys + keynum / 2,
+            [](auto const& a, auto const& b) { return a < b; });
+  std::cout << "Start the bulk load" << std::endl;
       int level = the_treep->bulkload (keynum / 2, keys, bfill);
 #else
 	    // Input
