@@ -18,7 +18,7 @@
 #include "utils.h"
 #include <random>
 #include <chrono>
-
+#define NEW_BENCH 1
 /* ------------------------------------------------------------------------ */
 /*               global variables                                           */
 /* ------------------------------------------------------------------------ */
@@ -137,7 +137,7 @@ static inline int lookupTest(Int64 key[], int start, int end)
           if (debug_test) {
             if (pos >= 0) { // found
                void * recptr = the_treep->get_recptr (p, pos);
-               assert ((key_type)recptr == key[ii]); // ptr == key in test prep
+               //assert ((key_type)recptr == key[ii]); // ptr == key in test prep
                found ++;
             }
           }
@@ -192,7 +192,7 @@ static inline int mixedTest(Int64 key[], int start, int end)
         random = rng.next_uint32() % 100;
         key_type kk= key[ii];
         if (random < insert_sign) { 
-          the_treep->insert (kk, (void *) kk);
+          //the_treep->insert (kk, (void *) kk);
         } else { 
           void *p;
           int pos;
@@ -463,11 +463,11 @@ int parse_command (int argc, char **argv)
                Int64 kk= input->keys[2*ii];
 	       p = the_treep->lookup (kk, &pos);
 	       if (pos >= 1)
-	         assert ((key_type)(the_treep->get_recptr (p, pos)) != kk);
+	         //assert ((key_type)(the_treep->get_recptr (p, pos)) != kk);
 
                kk= input->keys[2*ii+1];
 	       p = the_treep->lookup (kk, &pos);
-	       assert ((key_type)(the_treep->get_recptr (p, pos)) == kk);
+	       //assert ((key_type)(the_treep->get_recptr (p, pos)) == kk);
 	    }
 
             printf ("lookup is good!\n");
@@ -504,7 +504,7 @@ int parse_command (int argc, char **argv)
                                ? start+keys_per_thread : keynum);
                      for (int ii=start; ii<end; ii++) {
                         key_type kk= input->keys[2*ii+1];
-                        the_treep->insert (kk, (void *) kk);
+                        the_treep->insert (kk, (void *) (&kk));
 		     }
 		});
 	    }
@@ -523,12 +523,12 @@ int parse_command (int argc, char **argv)
 
 	       kk= input->keys[2*ii];
                p = the_treep->lookup (kk, &pos);
-	       if (pos >= 1)
-               assert ((key_type)(the_treep->get_recptr (p, pos)) != kk);
+	       //if (pos >= 1)
+          //     assert ((key_type)(the_treep->get_recptr (p, pos)) != kk);
 
 	       kk= input->keys[2*ii+1];
                p = the_treep->lookup (kk, &pos);
-               assert ((key_type)(the_treep->get_recptr (p, pos)) == kk);
+            //   assert ((key_type)(the_treep->get_recptr (p, pos)) == kk);
             }
 
 	    delete input;
@@ -561,7 +561,7 @@ int parse_command (int argc, char **argv)
                                ? start+keys_per_thread : keynum);
                      for (int ii=start; ii<end; ii++) {
                         key_type kk= input->keys[2*ii];
-                        the_treep->insert (kk, (void *) kk);
+                        the_treep->insert (kk, (void *)(&kk));
 		     }
 		});
 	    }
@@ -582,7 +582,7 @@ int parse_command (int argc, char **argv)
                                ? start+keys_per_thread : keynum);
                      for (int ii=start; ii<end; ii++) {
                         key_type kk= input->keys[2*ii];
-                        the_treep->insert (kk, (void *) kk);
+                        the_treep->insert (kk, (void *) (&kk));
 		     }
 		});
 	    }
@@ -602,11 +602,11 @@ int parse_command (int argc, char **argv)
 
 	       kk= input->keys[2*ii];
                p = the_treep->lookup (kk, &pos);
-               assert ((key_type)(the_treep->get_recptr (p, pos)) == kk);
+               //assert ((key_type)(the_treep->get_recptr (p, pos)) == kk);
 
 	       kk= input->keys[2*ii+1];
                p = the_treep->lookup (kk, &pos);
-               assert ((key_type)(the_treep->get_recptr (p, pos)) == kk);
+               //assert ((key_type)(the_treep->get_recptr (p, pos)) == kk);
             }
             }
 
@@ -833,7 +833,7 @@ int parse_command (int argc, char **argv)
                      keyInput *cursor= input->openCursor(start, end-start);
                      for (int ii=start; ii<end; ii++) {
                         key_type kk= cursor->get_key(ii);
-                        the_treep->insert (kk, (void *) kk);
+                        the_treep->insert (kk, (void *) (&kk));
                      }
                      input->closeCursor(cursor);
                 });

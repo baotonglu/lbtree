@@ -24,7 +24,6 @@
 #include <emmintrin.h>
 #include <utility>
 
-#define NEW_BENCH 1
 #define PMDK_ALLOC 1
 
 /* ---------------------------------------------------------------------- */
