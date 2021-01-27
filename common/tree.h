@@ -120,8 +120,6 @@ class tree {
    * @param bfill    the fill factor, which is a float in (0,1]
    * @return         the number of tree levels
    */
-#ifdef 
-
 #ifdef NEW_BENCH
   virtual int bulkload (int keynum, key input[], float bfill)
    {
