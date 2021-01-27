@@ -15,6 +15,7 @@
 #include "tree.h"
 #include "allocator.h"   
 #include "uniform.h"
+#include "utils.h"
 #include <random>
 #include <chrono>
 
@@ -155,13 +156,13 @@ static inline int lookupTest(Int64 key[], int start, int end)
 /**
  * The test run for insert operations
  */
-static inline int insertTest(Int64 key[], int start, int end)
+static inline int insertTest(key_type key[], int start, int end)
 {
        int found= 0;
 
        for (int ii=start; ii<end; ii++) {
           key_type kk= key[ii];
-          the_treep->insert (kk, (void *) kk);
+          the_treep->insert (kk, (void *) (&key[ii]));
        } // end of for
 
        if (debug_test) {
@@ -234,6 +235,10 @@ int parse_command (int argc, char **argv)
 	if (argc < 2) usage (argv[0]);
 	char * cmd = argv[0];
 	argc --; argv ++;
+
+  // first generate the workload using the interface from Alex
+  key_type *keys;
+  int total_key_num = 0;
 
 	while (argc > 0) {
 
@@ -370,6 +375,7 @@ int parse_command (int argc, char **argv)
 	  // ---
           else if (strcmp (argv[0], "debug_bulkload") == 0) {
 	    // get params    
+#ifndef NEW_BENCH            
 	    if (argc < 3) usage (cmd);
 	    int keynum = atoi (argv[1]);
 	    float bfill; sscanf (argv[2], "%f", &bfill);
@@ -392,6 +398,7 @@ int parse_command (int argc, char **argv)
             delete input;
 
 	    printf ("bulkload is good!\n");
+#endif
 	  }
 
           // ---
@@ -752,11 +759,19 @@ int parse_command (int argc, char **argv)
 
 	    printf ("-- bulkload %d %s %f\n", keynum, keyfile, bfill);
 
+#ifdef NEW_BENCH
+      //bulk load half of the total data
+      std::string key_file_path(keyfile);
+      keys = new key_type[key_num];
+      total_key_num = key_num;
+      load_binary_data(keys, key_num, key_file_path);
+      int level = the_treep->bulkload (keynum / 2, keys, bfill);
+#else
 	    // Input
 	    bufferedKeyInput *input = new bufferedKeyInput(keyfile, 0, keynum);
-
             // bulkload then check
             int level = the_treep->bulkload (keynum, input, bfill);
+#endif
             printf ("root is at %d level\n", level);
 
             key_type start, end;
@@ -903,10 +918,12 @@ int parse_command (int argc, char **argv)
             argc -= 3; argv += 3;
 
             printf ("-- insert %d %s\n", keynum, keyfile);
-
+#ifdef NEW_BENCH
+            key_type* key = keys + (total_key_num / 2);
+#else
             // get keys from the file
             Int64 * key = getKeys (keyfile, keynum);
-
+#endif
             // test
             unsigned long long total_us= 0;
 

@@ -22,7 +22,9 @@
 
 #include "mytree.h"
 #include <emmintrin.h>
+#include <utility>
 
+#define NEW_BENCH 1
 #define PMDK_ALLOC 1
 
 /* ---------------------------------------------------------------------- */
@@ -227,7 +229,7 @@ class treeMeta {
 
 class lbtree: public tree {
   public:  // root and level
-    
+    typedef std::pair<key_type, void *> V;
     treeMeta * tree_meta;
     
   public:
@@ -240,10 +242,15 @@ class lbtree: public tree {
     {delete tree_meta;}
 
   private:
+#ifdef NEW_BENCH
+    int bulkloadSubtree(key_type *input, int start_key, int num_key, 
+                        float bfill, int target_level,
+                        Pointer8B pfirst[], Pointer8B plast[], int n_nodes[]);
+#else  
     int bulkloadSubtree(keyInput *input, int start_key, int num_key, 
                         float bfill, int target_level,
                         Pointer8B pfirst[], Pointer8B plast[], int n_nodes[]);
-    
+#endif    
     int bulkloadToptree(Pointer8B ptrs[], key_type keys[], int num_key,
                         float bfill, int cur_level, int target_level,
                         Pointer8B pfirst[], int n_nodes[]);
@@ -260,7 +267,11 @@ class lbtree: public tree {
   public:
     // bulkload a tree and return the root level
     // use multiple threads to do the bulkloading
+#ifdef NEW_BENCH
+    int bulkload (int keynum, key_type input[], float bfill);
+#else
     int bulkload (int keynum, keyInput *input, float bfill);
+#endif
     
     void randomize (Pointer8B pnode, int level);
     void randomize()

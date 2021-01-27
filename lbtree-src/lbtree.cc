@@ -81,6 +81,182 @@ static void initUseful(void)
  * @retval the top level of the subtree (can be smaller than target_level
  * if the root level is smaller target_level)
  */
+#ifdef NEW_BENCH
+int lbtree::bulkloadSubtree(
+    key_type *input, int start_key, int num_key, 
+    float bfill, int target_level,
+    Pointer8B pfirst[], Pointer8B plast[], int n_nodes[])
+{
+    // We assume that a tree cannot be higher than 32 levels
+    int ncur[32];     // current node at every level
+    int top_level;    // top_level is the top level that this method builds
+
+    assert(start_key>=0 && num_key > 0 && bfill>0.0 && bfill<=1.0
+           && target_level>=0);
+
+
+    // 1. compute leaf and nonleaf number of keys
+    int leaf_fill_num= (int)((float)LEAF_KEY_NUM * bfill);
+    leaf_fill_num= MAX(leaf_fill_num, 1);
+
+    int nonleaf_fill_num= (int)((float)NON_LEAF_KEY_NUM * bfill);
+    nonleaf_fill_num= MAX(nonleaf_fill_num, 1);
+
+
+    // 2. compute number of nodes
+    n_nodes[0]= ceiling(num_key, leaf_fill_num);
+    top_level= 0;
+
+    for (int i=1; n_nodes[i-1]>1 && i<=target_level; i++) {
+       n_nodes[i]= ceiling(n_nodes[i-1], nonleaf_fill_num+1);
+       top_level= i;
+    } // end of for each nonleaf level
+
+    // 3. allocate nodes
+#ifndef PMDK_ALLOC
+    pfirst[0]= nvmpool_alloc(sizeof(bleaf) * n_nodes[0]);
+#else
+    Pointer8B** nodes_array = new Pointer8B *[top_level + 1]; 
+    int leaf_num = n_nodes[0];
+    nodes_array[0] = new Pointer8B[leaf_num];
+    for(int i = 0; i < leaf_num; ++i){
+      my_alloc::BasePMPool::ZAllocate((void**)&nodes_array[0][i], sizeof(bleaf));
+      size_of_PM += sizeof(bleaf);
+    }
+    pfirst[0] = nodes_array[0][0];
+    plast[0] = nodes_array[0][leaf_num - 1];
+#endif
+
+    for (int i=1; i<=top_level; i++) {
+    //BT: FIXME, confusing => why using preallocation like this way?
+#ifndef PMDK_ALLOC
+       pfirst[i]= mempool_alloc(sizeof(bnode) * n_nodes[i]);
+#else
+       nodes_array[i] = new Pointer8B[n_nodes[i]];
+       for(int j = 0; j < n_nodes[i]; ++j){
+          nodes_array[i][j] = alignedmalloc(sizeof(bnode));
+          size_of_DRAM += sizeof(bnode);
+       }
+       pfirst[i] = nodes_array[i][0];
+#endif
+    }
+    // nvmpool_alloc/mempool_alloc call exit if out of memory
+
+    // 4. populate nodes
+    for (int ll=1; ll<=top_level; ll++) {
+        ncur[ll]= 0;
+        bnode *np= (bnode *)(pfirst[ll]);
+        np->lock()= 0; np->num()= -1;
+    }
+
+    bleaf * leaf= pfirst[0];
+    int nodenum= n_nodes[0];
+
+    bleafMeta leaf_meta;
+    leaf_meta.v.bitmap= ( ((1<<leaf_fill_num)-1)
+                         <<(LEAF_KEY_NUM-leaf_fill_num));
+    leaf_meta.v.lock= 0;
+    leaf_meta.v.alt= 0;
+
+    int key_id= start_key;
+    // For-loop for all leaf nodes
+    for (int i=0; i<nodenum; i++) {
+#ifdef PMDK_ALLOC
+        bleaf *lp = static_cast<bleaf*>(nodes_array[0][i]);
+#else
+        bleaf *lp = &(leaf[i]);
+#endif
+        // compute number of keys in this leaf node
+        int fillnum= leaf_fill_num; // in most cases
+        if (i == nodenum-1) {
+           fillnum= num_key - (nodenum-1)*leaf_fill_num;
+           assert(fillnum>=1 && fillnum<=leaf_fill_num);
+
+           leaf_meta.v.bitmap= ( ((1<<fillnum)-1)
+                                <<(LEAF_KEY_NUM-fillnum));
+        }
+
+        // lbtree tends to leave the first line empty
+        for (int j=LEAF_KEY_NUM-fillnum; j<LEAF_KEY_NUM; j++) {
+
+            // get key from input
+            //key_type mykey= (key_type)(input->get_key(key_id));
+            key_type mykey = input[key_id];
+            key_id ++;
+
+            // entry
+            lp->k(j) = mykey;
+            lp->ch(j) = (void *)(&input[key_id]);
+
+            // hash 
+            leaf_meta.v.fgpt[j]= hashcode1B(mykey);
+
+        } // for each key in this leaf node
+
+        // sibling pointer
+#ifdef PMDK_ALLOC
+        lp->next[0] = ((i<nodenum-1) ? static_cast<bleaf*>(nodes_array[0][i+1]) : NULL);
+#else
+        lp->next[0]= ((i<nodenum-1) ? &(leaf[i+1]) : NULL);
+#endif
+        lp->next[1]= NULL;
+
+        // 2x8B meta
+        lp->setBothWords(&leaf_meta);
+
+        // populate nonleaf node
+        Pointer8B child= lp;
+        key_type left_key= lp->k(LEAF_KEY_NUM-fillnum);
+
+        // append (left_key, child) to level ll node
+        // child is the level ll-1 node to be appended.
+        // left_key is the left-most key in the subtree of child.
+        for (int ll=1; ll<=top_level; ll++) {
+#ifdef PMDK_ALLOC
+           bnode *np = static_cast<bnode*>(nodes_array[ll][ncur[ll]]);
+#else
+           bnode *np= ((bnode *)(pfirst[ll])) + ncur[ll];
+#endif
+           // if the node has >=1 child
+           if (np->num() >= 0) {
+               int kk= np->num()+1;
+               np->ch(kk)= child; np->k(kk)= left_key; 
+               np->num()= kk;
+
+               if ((kk==nonleaf_fill_num)&&(ncur[ll]<n_nodes[ll]-1)) { 
+                   ncur[ll] ++; 
+#ifdef PMDK_ALLOC
+                   np = static_cast<bnode*>(nodes_array[ll][ncur[ll]]);
+#else
+                   np ++;
+#endif
+                   np->lock()= 0; np->num()= -1;
+               }
+               break;
+           }
+
+           // new node
+           np->ch(0)= child; np->num() = 0;
+
+           // append this new node to parent
+           child= np;
+
+        } // for each nonleaf level
+
+    } // end of foreach leaf node
+
+#ifdef PMDK_ALLOC
+    // deallocate the memory
+    for(int i = 0; i <= top_level; ++i){
+      delete [] nodes_array[i];
+    }
+    delete [] nodes_array;
+#endif
+    // 5. return
+    return top_level;
+}
+
+#else
 int lbtree::bulkloadSubtree(
     keyInput *input, int start_key, int num_key, 
     float bfill, int target_level,
@@ -253,6 +429,7 @@ int lbtree::bulkloadSubtree(
     // 5. return
     return top_level;
 }
+#endif
 
 /**
  * build a top tree containing: ptrs/keys[0..num_key-1]
@@ -433,6 +610,35 @@ typedef struct BldThArgs {
 //
 // bulkload using multiple threads
 //
+#ifdef NEW_BENCH
+int lbtree::bulkload (int keynum, key_type input[], float bfill)
+{
+    // 1. allocate BldThArgs[]
+    int num_threads= 1;
+
+    BldThArgs *bta= new BldThArgs[num_threads];
+    if (!bta) {perror("malloc"); exit(1);}
+
+
+    // 2. one thread?
+      std::cout << "use single-thread to bulkload" << std::endl;
+        bta[0].top_level= bulkloadSubtree(
+                               input, 0, keynum, bfill, 31,
+                               bta[0].pfirst, bta[0].plast, bta[0].n_nodes);
+        tree_meta->root_level=  bta[0].top_level;
+        tree_meta->tree_root=   bta[0].pfirst[tree_meta->root_level];
+        tree_meta->setFirstLeaf(bta[0].pfirst[0]);
+
+        // if this assertion is false, then the tree has > 31 levels
+        assert(bta[0].n_nodes[bta[0].top_level] == 1);
+
+    std::cout << "Used PM = " << size_of_PM / (1024. * 1024. * 1024.) << std::endl;
+    std::cout << "Used DRAM = " << size_of_DRAM / (1024. * 1024. * 1024.)<< std::endl;
+
+        delete[] bta;
+        return tree_meta->root_level;
+}
+#else
 int lbtree::bulkload (int keynum, keyInput *input, float bfill)
 {
     // 1. allocate BldThArgs[]
@@ -547,6 +753,7 @@ int lbtree::bulkload (int keynum, keyInput *input, float bfill)
 
     return tree_meta->root_level;
 }
+#endif
 
 
 /* ----------------------------------------------------------------- *
@@ -1621,7 +1828,7 @@ int main (int argc, char *argv[])
 
     initUseful();
 
-        // Initialize the memory pool
+    // Initialize the memory pool
     my_alloc::BasePMPool::Initialize(pool_name, pool_size);
     my_alloc::BasePMPool::IncreaseAllocatorNum(); 
 
