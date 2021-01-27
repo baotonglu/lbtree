@@ -19,7 +19,7 @@
 
 static const char* layout_name = "template_pool";
 static const uint64_t pool_addr = 0x5f0000000000;
-static const char* pool_name = "/mnt/pmem0/baotong/lbtree.data";
+static const char* pool_name = "/mnt/pmem1/baotong/lbtree.data";
 static const uint64_t pool_size = 20UL * 1024*1024*1024;
  
 //#define PREALLOC 1
