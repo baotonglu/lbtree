@@ -18,6 +18,7 @@
 
 #include "lbtree.h"
 #include <cstdint>
+#include <limits>
 
 int node_split = 0;
 uint64_t size_of_PM = 0;
@@ -1649,8 +1650,10 @@ void lbtree::print (Pointer8B pnode, int level)
 void lbtree::getMinMaxKey (bleaf *p, key_type &min_key, key_type &max_key)
 {
     unsigned short bmp= p->bitmap;
-    max_key= MIN_KEY;
-    min_key= MAX_KEY;
+    //max_key= MIN_KEY;
+    //min_key= MAX_KEY;
+    max_key=  std::numeric_limits<key_type>::lowest();
+    min_key= std::numeric_limits<key_type>::max();
     
     for (int i=0; i<LEAF_KEY_NUM; i++) {
         if (bmp & (1<<i)) {

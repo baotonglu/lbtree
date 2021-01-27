@@ -775,6 +775,10 @@ int parse_command (int argc, char **argv)
        std::sort(keys, keys + keynum / 2,
             [](key_type const& a, key_type const& b) { return a < b; });
   std::cout << "Start the bulk load" << std::endl;
+      for(int i = 0; i < key_num / 2; ++i){
+        
+      }
+
       int level = the_treep->bulkload (keynum / 2, keys, bfill);
 #else
 	    // Input
