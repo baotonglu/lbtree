@@ -49,7 +49,7 @@
 #define LEAF_SIZE       (CACHE_LINE_SIZE * LEAF_LINE_NUM)
 
 // key size and pointer size: 8B
-typedef long long key_type;
+typedef double key_type;
 #define KEY_SIZE             8   /* size of a key in tree node */
 #define POINTER_SIZE         8   /* size of a pointer/value in node */
 #define ITEM_SIZE            8   /* key size or pointer size */
