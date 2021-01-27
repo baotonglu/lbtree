@@ -121,7 +121,7 @@ class tree {
    * @return         the number of tree levels
    */
 #ifdef NEW_BENCH
-  virtual int bulkload (int keynum, key input[], float bfill)
+  virtual int bulkload (int keynum, key_t input[], float bfill)
    {
   fprintf (stderr, "Not implemented!\n");
   exit (1);
