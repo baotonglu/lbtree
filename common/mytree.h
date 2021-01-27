@@ -547,8 +547,9 @@ int parse_command (int argc, char **argv)
                 // But it's ok for debugging.
 
             // bulkload odd keys
+#ifndef NEW_BENCH      
             int level = the_treep->bulkload (keynum, input, bfill);
-
+#endif
             // randomize the leaf nodes
 	    the_treep->randomize();
 
@@ -824,9 +825,9 @@ int parse_command (int argc, char **argv)
 	    int bulkload_num = keynum/10;
 #ifndef NEW_BENCH      
             int level = the_treep->bulkload (bulkload_num, input, 1.0);
-#endif
 	    printf ("After bulkloading %d keys, level is %d\n",
 		     bulkload_num, level);
+#endif
 
             // insertion: [bulkload_num, keynum-1], keynum-bulkload_num keys
             int range= FLOOR(keynum-bulkload_num, worker_thread_num);
