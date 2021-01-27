@@ -885,8 +885,11 @@ int parse_command (int argc, char **argv)
             printf ("-- lookup %d %s\n", keynum, keyfile);
 
             // load keys from the file into an array in memory
+#ifdef NEW_BENCH
+            key = keys;
+#else            
             Int64 * key = getKeys (keyfile, keynum);
-
+#endif
             // test
             unsigned long long total_us= 0;
 
