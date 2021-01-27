@@ -31,6 +31,8 @@
 /*                            Default Parameters                          */
 /* ---------------------------------------------------------------------- */
 
+#define NEW_BENCH 1
+
 // the size of a tree node
 #define NONLEAF_LINE_NUM        4    // 256B
 #define LEAF_LINE_NUM           4    // 256B
@@ -118,12 +120,24 @@ class tree {
    * @param bfill    the fill factor, which is a float in (0,1]
    * @return         the number of tree levels
    */
+#ifdef 
+
+#ifdef NEW_BENCH
+  virtual int bulkload (int keynum, key input[], float bfill)
+   {
+  fprintf (stderr, "Not implemented!\n");
+  exit (1);
+  return 0;
+   }
+#else
    virtual int bulkload (int keynum, keyInput *input, float bfill)
    {
 	fprintf (stderr, "Not implemented!\n");
 	exit (1);
 	return 0;
    }
+
+#endif
 
   /**
    * randomize the key orders in nodes (only for unsorted/bitmap trees)

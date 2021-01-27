@@ -18,7 +18,6 @@
 #include "utils.h"
 #include <random>
 #include <chrono>
-#define NEW_BENCH 1
 /* ------------------------------------------------------------------------ */
 /*               global variables                                           */
 /* ------------------------------------------------------------------------ */
@@ -762,9 +761,9 @@ int parse_command (int argc, char **argv)
 #ifdef NEW_BENCH
       //bulk load half of the total data
       std::string key_file_path(keyfile);
-      keys = new key_type[key_num];
-      total_key_num = key_num;
-      load_binary_data(keys, key_num, key_file_path);
+      keys = new key_type[keynum];
+      total_key_num = keynum;
+      load_binary_data(keys, keynum, key_file_path);
       int level = the_treep->bulkload (keynum / 2, keys, bfill);
 #else
 	    // Input
@@ -778,7 +777,9 @@ int parse_command (int argc, char **argv)
             the_treep->check (&start, &end);
 
             // free keys
+#ifndef NEW_BENCH            
             delete input;
+#endif
           }
 
 	  // ---
