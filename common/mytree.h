@@ -414,8 +414,10 @@ int parse_command (int argc, char **argv)
 	    simpleKeyInput *input = new simpleKeyInput(2*keynum, 0, 2);
 
             // bulkload then check
+#ifndef NEW_BENCH      
             int level = the_treep->bulkload (keynum, input, bfill);
             printf ("root is at %d level\n", level);
+#endif
 	    the_treep->randomize();  // randomize a sorted tree
 	    the_treep->randomize();  // randomize an already random tree
 
@@ -445,7 +447,9 @@ int parse_command (int argc, char **argv)
 	    inMemKeyInput *input = new inMemKeyInput(2*keynum, 1, 2);
 
             // bulkload then check
+#ifndef NEW_BENCH 
             int level = the_treep->bulkload (keynum, input, bfill);
+#endif
             the_treep->randomize();
 
             key_type start, end;
@@ -488,8 +492,9 @@ int parse_command (int argc, char **argv)
 	    inMemKeyInput *input = new inMemKeyInput(2*keynum, 1, 2);
 
              // bulkload 1 key
+#ifndef NEW_BENCH
             int level = the_treep->bulkload (1, input, bfill);
-
+#endif
             // insertion: keynum-1 keys
             int keys_per_thread= FLOOR(keynum-1, worker_thread_num);
 
@@ -627,9 +632,10 @@ int parse_command (int argc, char **argv)
             // initiate keys
 	    inMemKeyInput *input = new inMemKeyInput(keynum, 0, 1);
 
+#ifndef NEW_BENCH
             // bulkload
             int level = the_treep->bulkload (keynum, input, bfill);
-
+#endif
             // randomize the leaf nodes
 	    the_treep->randomize();
 
@@ -816,7 +822,9 @@ int parse_command (int argc, char **argv)
 
             // bulkload 10% of the keys
 	    int bulkload_num = keynum/10;
+#ifndef NEW_BENCH      
             int level = the_treep->bulkload (bulkload_num, input, 1.0);
+#endif
 	    printf ("After bulkloading %d keys, level is %d\n",
 		     bulkload_num, level);
 
