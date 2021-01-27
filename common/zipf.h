@@ -4,6 +4,9 @@
 // Zipf generator, inspired by
 // https://github.com/brianfrankcooper/YCSB/blob/master/core/src/main/java/site/ycsb/generator/ScrambledZipfianGenerator.java
 // https://github.com/brianfrankcooper/YCSB/blob/master/core/src/main/java/site/ycsb/generator/ZipfianGenerator.java
+#include <random>
+#include <functional>
+
 
 class ScrambledZipfianGenerator {
  public:

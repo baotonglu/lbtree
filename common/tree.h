@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <thread>
 #include <atomic>
+#include <cstdint>
 
 #include <immintrin.h>
 
@@ -80,7 +81,8 @@ Returns the number of 1-bits in x.
 #define bitScan(x)  __builtin_ffs(x)
 #define countBit(x) __builtin_popcount(x)
 
-static inline unsigned char hashcode1B(key_type x) {
+static inline unsigned char hashcode1B(key_type y) {
+    uint64_t x = (uint64_t &)y;
     x ^= x>>32;
     x ^= x>>16;
     x ^= x>>8;
