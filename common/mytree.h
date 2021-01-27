@@ -978,6 +978,7 @@ int parse_command (int argc, char **argv)
                 }
             }while(0))
 
+            std::cout << "Throughput = " << (double)keynum / ((double)total_us / 1000 / 1000) << " Mops/s" << std::endl; 
 #ifdef NVMFLUSH_STAT
 	    NVMFLUSH_STAT_print();
 #endif
@@ -997,7 +998,7 @@ int parse_command (int argc, char **argv)
               }
             }
 
-            free (key);
+           // free (key);
           }
 
           else if (strcmp (argv[0], "mixed") == 0) {
