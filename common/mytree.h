@@ -946,7 +946,7 @@ int parse_command (int argc, char **argv)
             Int64 * key = getKeys (keyfile, keynum);
 #endif
             // test
-            unsigned long long total_us= 0;
+            unsigned long long my_total_us= 0;
 
             std::thread threads[worker_thread_num];
             int range= FLOOR(keynum, worker_thread_num);
@@ -959,7 +959,7 @@ int parse_command (int argc, char **argv)
 	    NVMFLUSH_STAT_init();
 #endif
 
-            TEST_PERFORMANCE(total_us, do {
+            TEST_PERFORMANCE(my_total_us, do {
                 if (worker_thread_num > 1) {
                   std::cout << "start the concurrent test" << std::endl;
                   for (int t=0; t<worker_thread_num; t++) {
@@ -981,8 +981,8 @@ int parse_command (int argc, char **argv)
                 }
             }while(0))
             std::cout << "key num = " << keynum << std::endl;
-            std::cout << "Time = " << ((double)total_us / 1000 / 1000) << " s" << std::endl; 
-            std::cout << "Throughput = " << ((double)keynum / ((double)total_us / 1000 / 1000)) << " Mops/s" << std::endl; 
+            std::cout << "Time = " << ((double)my_total_us / 1000 / 1000) << " s" << std::endl; 
+            std::cout << "Throughput = " << ((double)keynum / ((double)my_total_us / 1000 / 1000)) << " Mops/s" << std::endl; 
 #ifdef NVMFLUSH_STAT
 	    NVMFLUSH_STAT_print();
 #endif
