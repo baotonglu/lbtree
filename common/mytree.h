@@ -980,8 +980,9 @@ int parse_command (int argc, char **argv)
                   found= insertTest(key, 0, keynum);
                 }
             }while(0))
-
-            std::cout << "Throughput = " << (double)keynum / ((double)total_us / 1000 / 1000) << " Mops/s" << std::endl; 
+            std::cout << "key num = " << keynum << std::endl;
+            std::cout << "Time = " << ((double)total_us / 1000 / 1000) << " s" << std::endl; 
+            std::cout << "Throughput = " << ((double)keynum / ((double)total_us / 1000 / 1000)) << " Mops/s" << std::endl; 
 #ifdef NVMFLUSH_STAT
 	    NVMFLUSH_STAT_print();
 #endif
