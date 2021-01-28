@@ -39,6 +39,13 @@ int total_node_splits;  // an insertion may cause multiple node splits
 NVMFLUSH_STAT_DEFS;
 #endif
 
+void set_affinity(uint32_t idx) {
+  cpu_set_t my_set;
+  CPU_ZERO(&my_set);
+  CPU_SET(idx, &my_set);
+  sched_setaffinity(0, sizeof(cpu_set_t), &my_set);
+}
+
 /* ------------------------------------------------------------------------ */
 /*               get keys from a key file of int keys                       */
 /* ------------------------------------------------------------------------ */
@@ -156,10 +163,10 @@ static inline int lookupTest(key_type key[], int start, int end)
 /**
  * The test run for insert operations
  */
-static inline int insertTest(key_type key[], int start, int end)
+static inline int insertTest(key_type key[], int start, int end, int thread_id = 0)
 {
+      set_affinity(thread_id);
        int found= 0;
-
        for (int ii=start; ii<end; ii++) {
           key_type kk= key[ii];
           the_treep->insert (kk, (void *) (&key[ii]));
@@ -967,7 +974,7 @@ int parse_command (int argc, char **argv)
                            worker_id= t;
                            int start= range*t;
                            int end= ((t < worker_thread_num-1) ? start+range: keynum);
-                           int th_found= insertTest(key, start, end);
+                           int th_found= insertTest(key, start, end, t);
                            if (debug_test) found.fetch_add(th_found);
                       });
                   }
