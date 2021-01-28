@@ -886,7 +886,7 @@ int parse_command (int argc, char **argv)
 
             // load keys from the file into an array in memory
 #ifdef NEW_BENCH
-            key = keys;
+            key_type* key = keys;
 #else            
             Int64 * key = getKeys (keyfile, keynum);
 #endif
