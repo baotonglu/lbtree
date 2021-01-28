@@ -123,7 +123,7 @@ int compar_void_ptr(const void *p1, const void *p2)
 /**
  * The test run for lookup operations
  */
-static inline int lookupTest(Int64 key[], int start, int end)
+static inline int lookupTest(key_type key[], int start, int end)
 {
        int found= 0;
        int not_found = 0;
