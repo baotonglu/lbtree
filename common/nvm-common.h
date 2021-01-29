@@ -100,8 +100,6 @@ void sfence(void)
 
 #define NVMFLUSH_STAT_DEFS   long long num_clwb, num_sfence
 
-extern long long num_clwb, num_sfence;
-
 static inline
 void NVMFLUSH_STAT_init()
 {
