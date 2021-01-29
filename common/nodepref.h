@@ -15,6 +15,7 @@
 #ifndef _BTREE_NODEPREF_H
 #define _BTREE_NODEPREF_H
 
+namespace lbtreespace{
 /* --------------------------------------------------------------------- */
 /*                      Prefetch Instructions                            */
 /* --------------------------------------------------------------------- */
@@ -432,5 +433,7 @@ static inline void software_clear_cache (void)
 
 #endif /* clear_cache */
 
+
+}
 /* ---------------------------------------------------------------------- */
 #endif /* _BTREE_NODEPREF_H */

@@ -23,7 +23,7 @@
 // NVMFLUSH_REAL:  flush
 // NVMFLUSH_STAT:  no flush, count stats
 // NVMFLUSH_DUMMY: no flush
-
+namespace lbtreespace{
 #define NVMFLUSH_REAL
 
 #if   defined(NVMFLUSH_REAL)
@@ -230,4 +230,5 @@ void writeLineMOVNT(char *dest, char *src)
 #define NL_ABORT         0x81
 #define NL_ONGOING       0x82
 
+}
 #endif /* _NVM_COMMON_H */
