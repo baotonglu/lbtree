@@ -4,7 +4,7 @@ CC=g++
 # CFLAGS=-O0 -g -std=c++11 -pthread -mrtm -msse4.1 -mavx2
 
 # Flag for test runs
-CFLAGS=-O3 -std=c++11 -pthread -mrtm -msse4.1 -mavx2 
+CFLAGS=-O3 -std=c++14 -pthread -mrtm -msse4.1 -mavx2 
 
 INCLUDE=-I./common
 LIB=-lpmem -lpmemobj
