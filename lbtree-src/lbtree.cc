@@ -16,7 +16,7 @@ int main (int argc, char *argv[])
     // create the tree
     char *nvm_addr;
     my_alloc::BasePMPool::ZAllocate((void **)&nvm_addr, 4*KB);
-    lbtree* index = initLBTree(nvm_addr, false);
+    lbtreespace::lbtree* index = lbtreespace::initLBTree(nvm_addr, false);
       
     // first bulk load, then do the insert operation
     int keynum;

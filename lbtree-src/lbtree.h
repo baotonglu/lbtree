@@ -29,6 +29,18 @@
 #include <chrono>
 #include <algorithm>
 #include <cassert>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <thread>
+#include <atomic>
+#include <cstdint>
+#include <immintrin.h>
+#include "nvm-common.h"
+
+
+namespace lbtreespace{
 
 #define NEW_BENCH 1
 
@@ -61,8 +73,6 @@ typedef double key_type;
 
 //#include "keyinput.h"
 //#include "mempool.h"
-#include "nvm-common.h"
-
 #define PMDK_ALLOC 1
 
 /* ---------------------------------------------------------------------- */
@@ -79,16 +89,6 @@ typedef double key_type;
 #endif
 
 #define LEAF_KEY_NUM        (14) 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-#include <thread>
-#include <atomic>
-#include <cstdint>
-
-#include <immintrin.h>
 
 /* ---------------------------------------------------------------------- */
 /*                            Default Parameters                          */
@@ -2221,6 +2221,8 @@ lbtree * initLBTree(void *nvm_addr, bool recover)
     lbtree *mytree = new lbtree(nvm_addr, recover);
     std::cout << "Successfully create my lbtree" << std::endl;
     return mytree;
+}
+
 }
 
 /* ---------------------------------------------------------------------- */
