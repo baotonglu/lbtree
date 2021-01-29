@@ -1876,7 +1876,7 @@ int main (int argc, char *argv[])
     for (int i = 0; i < insert_num; ++i)
     {
       key_type kk = key[i];
-      index->insert (kk, (void *) (&key[ii]));
+      index->insert (kk, (void *) (&key[i]));
     }
     std::cout << "finish the insert" << std::endl;
     // debug insert
