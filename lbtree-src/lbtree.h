@@ -60,7 +60,6 @@ typedef double key_type;
 #define MIN_KEY   ((key_type)(0x8000000000000000ULL))
 
 //#include "keyinput.h"
-#include "nodepref.h"
 //#include "mempool.h"
 #include "nvm-common.h"
 
