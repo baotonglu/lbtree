@@ -1852,6 +1852,8 @@ int main (int argc, char *argv[])
     // first bulk load, then do the insert operation
     int keynum;
     key_type* keys;
+    argc--;
+    argv++;
     if (strcmp(argv[0], "bulkload") == 0)
     {
       keynum = atoi (argv[1]);
