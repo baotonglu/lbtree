@@ -20,9 +20,14 @@
 #define _LBTREE_H
 /* ---------------------------------------------------------------------- */
 
-#include "mytree.h"
 #include <emmintrin.h>
 #include <utility>
+#include "tree.h"
+#include "allocator.h"
+#include "utils.h"
+#include <random>
+#include <chrono>
+#include <algorithm>
 
 #define PMDK_ALLOC 1
 
