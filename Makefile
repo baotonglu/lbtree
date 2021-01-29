@@ -10,8 +10,6 @@ INCLUDE=-I./common
 LIB=-lpmem -lpmemobj
 
 COMMON_DEPENDS= ./common/nodepref.h ./common/nvm-common.h ./common/performance.h ./common/allocator.h
-COMMON_SOURCES= ./common/mempool.cc
-
 # -----------------------------------------------------------------------------
 TARGETS=lbtree 
 
@@ -22,7 +20,7 @@ all: ${TARGETS}
 # -----------------------------------------------------------------------------
 
 lbtree: lbtree-src/lbtree.h lbtree-src/lbtree.cc ${COMMON_DEPENDS}
-	${CC} -o $@ ${CFLAGS} ${INCLUDE} lbtree-src/lbtree.cc ${COMMON_SOURCES} ${LIB}
+	${CC} -o $@ ${CFLAGS} ${INCLUDE} lbtree-src/lbtree.cc ${LIB}
 
 
 # -----------------------------------------------------------------------------
