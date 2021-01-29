@@ -2,11 +2,11 @@
 
 int main (int argc, char *argv[])
 {
-    printf("NON_LEAF_KEY_NUM= %d, LEAF_KEY_NUM= %d, nonleaf size= %lu, leaf size= %lu\n",
+    //printf("NON_LEAF_KEY_NUM= %d, LEAF_KEY_NUM= %d, nonleaf size= %lu, leaf size= %lu\n",
            NON_LEAF_KEY_NUM, LEAF_KEY_NUM, sizeof(bnode), sizeof(bleaf));
-    assert((sizeof(bnode) == NONLEAF_SIZE)&&(sizeof(bleaf) == LEAF_SIZE));
+    //assert((sizeof(bnode) == NONLEAF_SIZE)&&(sizeof(bleaf) == LEAF_SIZE));
 
-    initUseful();
+    lbtreespace::initUseful();
 
     // Initialize the memory pool
     my_alloc::BasePMPool::Initialize(pool_name, pool_size);
@@ -20,7 +20,7 @@ int main (int argc, char *argv[])
       
     // first bulk load, then do the insert operation
     int keynum;
-    key_type* keys;
+    lbtreespace::key_type* keys;
     argc--;
     argv++;
     if (strcmp(argv[0], "bulkload") == 0)
@@ -29,24 +29,24 @@ int main (int argc, char *argv[])
       char* keyfile = argv[2];
       float bfill; sscanf (argv[3], "%f", &bfill);
 
-      keys = new key_type[keynum];
+      keys = new lbtreespace::key_type[keynum];
       load_binary_data(keys, keynum, keyfile);
       std::sort(keys, keys + keynum / 2,
-            [](key_type const& a, key_type const& b) { return a < b; });
+            [](lbtreespace::key_type const& a, lbtreespace::key_type const& b) { return a < b; });
       std::cout << "start the bulkload" << std::endl;
       int level = index->bulkload (keynum / 2, keys, bfill);
       std::cout << "finish the bulkload, root is at level " << level << std::endl;
-      key_type start, end;
+      lbtreespace::key_type start, end;
       index->check (&start, &end);
       std::cout << "the index check is good" << std::endl;
     }
 
     // start the insert
-    key_type* key = keys + (keynum / 2);
+    lbtreespace::key_type* key = keys + (keynum / 2);
     int insert_num = keynum / 2;
     for (int i = 0; i < insert_num; ++i)
     {
-      key_type kk = key[i];
+      lbtreespace::key_type kk = key[i];
       index->insert (kk, (void *) (&key[i]));
     }
     std::cout << "finish the insert" << std::endl;
