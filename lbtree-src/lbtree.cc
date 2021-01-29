@@ -60,8 +60,8 @@ int main (int argc, char *argv[])
     }
     std::cout << "Found = " << found << std::endl;
     //std::cout << "Node Split = " << node_split << std::endl;
-    std::cout << "Used PM = " << size_of_PM << std::endl;
-    std::cout << "Used DRAM = " << size_of_DRAM << std::endl;
+    std::cout << "Used PM = " << lbtreespace::size_of_PM << std::endl;
+    std::cout << "Used DRAM = " << lbtreespace::size_of_DRAM << std::endl;
     my_alloc::BasePMPool::get_collected();
     return 0;
 }
