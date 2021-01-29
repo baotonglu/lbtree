@@ -22,7 +22,7 @@
 
 #include <emmintrin.h>
 #include <utility>
-#include "tree.h"
+//#include "tree.h"
 #include "allocator.h"
 #include "utils.h"
 #include <random>
@@ -45,6 +45,97 @@
 #endif
 
 #define LEAF_KEY_NUM        (14) 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <thread>
+#include <atomic>
+#include <cstdint>
+
+#include <immintrin.h>
+
+/* ---------------------------------------------------------------------- */
+/*                            Default Parameters                          */
+/* ---------------------------------------------------------------------- */
+
+#define NEW_BENCH 1
+
+// the size of a tree node
+#define NONLEAF_LINE_NUM        4    // 256B
+#define LEAF_LINE_NUM           4    // 256B
+
+// the number of leaf nodes to prefetch ahead in jump pointer array 
+// prefetching
+#ifndef PREFETCH_NUM_AHEAD
+#define PREFETCH_NUM_AHEAD  3
+#endif
+
+/* ---------------------------------------------------------------------- */
+/*                 Node Size, Key Size, and Pointer Size                  */
+/* ---------------------------------------------------------------------- */
+
+// node size
+#define NONLEAF_SIZE    (CACHE_LINE_SIZE * NONLEAF_LINE_NUM)
+#define LEAF_SIZE       (CACHE_LINE_SIZE * LEAF_LINE_NUM)
+
+// key size and pointer size: 8B
+typedef double key_type;
+#define KEY_SIZE             8   /* size of a key in tree node */
+#define POINTER_SIZE         8   /* size of a pointer/value in node */
+#define ITEM_SIZE            8   /* key size or pointer size */
+
+#define MAX_KEY   ((key_type)(0x7fffffffffffffffULL))
+#define MIN_KEY   ((key_type)(0x8000000000000000ULL))
+
+#include "keyinput.h"
+#include "nodepref.h"
+#include "mempool.h"
+#include "nvm-common.h"
+#include "performance.h"
+
+/* ---------------------------------------------------------------------- */
+/*                            Useful funcions                             */
+/* ---------------------------------------------------------------------- */
+/* GCC builtin functions
+
+int __builtin_ffs (unsigned int x)
+Returns one plus the index of the least significant 1-bit of x, or if x is
+zero, returns zero.
+
+int __builtin_popcount (unsigned int x)
+Returns the number of 1-bits in x.
+
+*/
+
+#define bitScan(x)  __builtin_ffs(x)
+#define countBit(x) __builtin_popcount(x)
+
+static inline unsigned char hashcode1B(key_type y) {
+    uint64_t x = (uint64_t &)y;
+    x ^= x>>32;
+    x ^= x>>16;
+    x ^= x>>8;
+    return (unsigned char)(x&0x0ffULL);
+}
+
+static inline unsigned long long rdtsc(void)
+{
+    unsigned hi, lo;
+    __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+    return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
+}
+
+#define MIN(x,y)    ((x)<=(y) ? (x) : (y))
+#define MAX(x,y)    ((x)<=(y) ? (y) : (x))
+
+// compute ceiling(x/y) and floor(x/y)
+#define ceiling(x, y)  (((x) + (y) - 1) / (y))
+#define FLOOR(x, y)    ((x) / (y))
+
+#define SWAP(x, y) \
+do { auto _t=(x); (x)=(y); (y)=_t; } while(0)
 
 /* ---------------------------------------------------------------------- */
 /**
@@ -231,7 +322,7 @@ class treeMeta {
 
 /* ---------------------------------------------------------------------- */
 
-class lbtree: public tree {
+class lbtree: {
   public:  // root and level
     typedef std::pair<key_type, void *> V;
     treeMeta * tree_meta;
