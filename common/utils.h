@@ -9,7 +9,6 @@
 #include <stdint.h>
 
 #include <cstdint>
-#include "zipf.h"
 #include <iostream>
 #include <fstream>
 
@@ -112,27 +111,4 @@ bool load_text_data(T array[], int length, const std::string& file_path) {
   }
   is.close();
   return true;
-}
-
-template <class T>
-T* get_search_keys(T array[], int num_keys, int num_searches) {
-  std::mt19937_64 gen(std::random_device{}());
-  std::uniform_int_distribution<int> dis(0, num_keys - 1);
-  auto* keys = new T[num_searches];
-  for (int i = 0; i < num_searches; i++) {
-    int pos = dis(gen);
-    keys[i] = array[pos];
-  }
-  return keys;
-}
-
-template <class T>
-T* get_search_keys_zipf(T array[], int num_keys, int num_searches) {
-  auto* keys = new T[num_searches];
-  ScrambledZipfianGenerator zipf_gen(num_keys);
-  for (int i = 0; i < num_searches; i++) {
-    int pos = zipf_gen.nextValue();
-    keys[i] = array[pos];
-  }
-  return keys;
 }

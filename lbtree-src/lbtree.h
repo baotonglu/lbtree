@@ -63,8 +63,6 @@ typedef double key_type;
 #include "nodepref.h"
 //#include "mempool.h"
 #include "nvm-common.h"
-#include "performance.h"
-
 
 #define PMDK_ALLOC 1
 
