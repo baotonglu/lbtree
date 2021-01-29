@@ -29,6 +29,42 @@
 #include <chrono>
 #include <algorithm>
 
+#define NEW_BENCH 1
+
+// the size of a tree node
+#define NONLEAF_LINE_NUM        4    // 256B
+#define LEAF_LINE_NUM           4    // 256B
+
+// the number of leaf nodes to prefetch ahead in jump pointer array 
+// prefetching
+#ifndef PREFETCH_NUM_AHEAD
+#define PREFETCH_NUM_AHEAD  3
+#endif
+
+/* ---------------------------------------------------------------------- */
+/*                 Node Size, Key Size, and Pointer Size                  */
+/* ---------------------------------------------------------------------- */
+
+// node size
+#define NONLEAF_SIZE    (CACHE_LINE_SIZE * NONLEAF_LINE_NUM)
+#define LEAF_SIZE       (CACHE_LINE_SIZE * LEAF_LINE_NUM)
+
+// key size and pointer size: 8B
+typedef double key_type;
+#define KEY_SIZE             8   /* size of a key in tree node */
+#define POINTER_SIZE         8   /* size of a pointer/value in node */
+#define ITEM_SIZE            8   /* key size or pointer size */
+
+#define MAX_KEY   ((key_type)(0x7fffffffffffffffULL))
+#define MIN_KEY   ((key_type)(0x8000000000000000ULL))
+
+//#include "keyinput.h"
+#include "nodepref.h"
+//#include "mempool.h"
+#include "nvm-common.h"
+#include "performance.h"
+
+
 #define PMDK_ALLOC 1
 
 /* ---------------------------------------------------------------------- */
@@ -59,41 +95,6 @@
 /* ---------------------------------------------------------------------- */
 /*                            Default Parameters                          */
 /* ---------------------------------------------------------------------- */
-
-#define NEW_BENCH 1
-
-// the size of a tree node
-#define NONLEAF_LINE_NUM        4    // 256B
-#define LEAF_LINE_NUM           4    // 256B
-
-// the number of leaf nodes to prefetch ahead in jump pointer array 
-// prefetching
-#ifndef PREFETCH_NUM_AHEAD
-#define PREFETCH_NUM_AHEAD  3
-#endif
-
-/* ---------------------------------------------------------------------- */
-/*                 Node Size, Key Size, and Pointer Size                  */
-/* ---------------------------------------------------------------------- */
-
-// node size
-#define NONLEAF_SIZE    (CACHE_LINE_SIZE * NONLEAF_LINE_NUM)
-#define LEAF_SIZE       (CACHE_LINE_SIZE * LEAF_LINE_NUM)
-
-// key size and pointer size: 8B
-typedef double key_type;
-#define KEY_SIZE             8   /* size of a key in tree node */
-#define POINTER_SIZE         8   /* size of a pointer/value in node */
-#define ITEM_SIZE            8   /* key size or pointer size */
-
-#define MAX_KEY   ((key_type)(0x7fffffffffffffffULL))
-#define MIN_KEY   ((key_type)(0x8000000000000000ULL))
-
-#include "keyinput.h"
-#include "nodepref.h"
-#include "mempool.h"
-#include "nvm-common.h"
-#include "performance.h"
 
 /* ---------------------------------------------------------------------- */
 /*                            Useful funcions                             */
