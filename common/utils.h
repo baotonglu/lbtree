@@ -14,8 +14,6 @@
 
 #define PMEM 1
 //enable linear probing design
-#define HASH 1
-
 static constexpr const uint32_t kCacheLineSize = 64;
 
 static bool FileExists(const char *pool_path) {
