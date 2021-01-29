@@ -9,7 +9,7 @@ CFLAGS=-O3 -std=c++14 -pthread -mrtm -msse4.1 -mavx2
 INCLUDE=-I./common
 LIB=-lpmem -lpmemobj
 
-COMMON_DEPENDS= ./common/nodepref.h ./common/nvm-common.h ./common/performance.h ./common/allocator.h
+COMMON_DEPENDS= ./common/nodepref.h ./common/nvm-common.h ./common/allocator.h
 # -----------------------------------------------------------------------------
 TARGETS=lbtree 
 
