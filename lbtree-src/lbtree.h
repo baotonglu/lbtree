@@ -28,6 +28,7 @@
 #include <random>
 #include <chrono>
 #include <algorithm>
+#include <cassert>
 
 #define NEW_BENCH 1
 
@@ -323,7 +324,7 @@ class treeMeta {
 
 /* ---------------------------------------------------------------------- */
 
-class lbtree: {
+class lbtree {
   public:  // root and level
     typedef std::pair<key_type, void *> V;
     treeMeta * tree_meta;
